@@ -27,6 +27,21 @@ namespace PdfParser
 
             var pdfText = buffer.ToString();
 
+            MiamiAgendaItem(pdfText);
+
+            
+
+            Console.ReadLine();
+            //save text
+            //String fileName = "TextInPdf.txt";
+            //File.WriteAllText(fileName, buffer.ToString());
+
+            //System.Diagnostics.Process.Start(fileName);
+
+        }
+
+        private static void MiamiAgendaItem(string pdfText)
+        {
             // City of Miami Agenda Item
 
             var _breakline = "\r\n";
@@ -61,14 +76,6 @@ namespace PdfParser
             var backgroundOfItem = pdfText.Substring(pdfText.IndexOf(_backgroundOfitem) + _backgroundOfitem.Length, backgroundOfItemLength - _budgetImpactAnalysis.Length).Replace(_breakline, string.Empty).Replace("                    ", " ").Trim();
             var budgetImpactAnalysis = pdfText.Substring(pdfText.IndexOf(_budgetImpactAnalysis) + _budgetImpactAnalysis.Length, budgetImpactAnalysisLength - _totalFiscalImpact.Length).Replace(_breakline, string.Empty).Replace("                    ", " ").Replace("To", string.Empty).Trim();
             var totalFiscalImpact = pdfText.Substring(pdfText.IndexOf(_totalFiscalImpact) + _totalFiscalImpact.Length, totalFiscalImpactLength - _reviewedBy.Length).Replace(_breakline, string.Empty).Replace("                    ", " ").Replace("Reviewed", string.Empty).Trim();
-
-            Console.ReadLine();
-            //save text
-            //String fileName = "TextInPdf.txt";
-            //File.WriteAllText(fileName, buffer.ToString());
-
-            //System.Diagnostics.Process.Start(fileName);
-
         }
     }
 }
