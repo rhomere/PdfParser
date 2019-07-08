@@ -13,21 +13,12 @@ namespace PdfParser
         static void Main(string[] args)
         {
             //Create a pdf document
-            PdfDocument doc = new PdfDocument();
-            doc.LoadFromFile(@"C:\Projects\Snapshot-29208 (1).pdf");
 
-            StringBuilder buffer = new StringBuilder();
+            MiamiMeetingMinutes();
 
-            foreach (PdfPageBase pageBase in doc.Pages)
-            {
-                buffer.Append(pageBase.ExtractText());
-            }
+            
 
-            doc.Close();
-
-            var pdfText = buffer.ToString();
-
-            MiamiAgendaItem(pdfText);
+            //MiamiAgendaItem(pdfText);
 
             
 
@@ -40,9 +31,167 @@ namespace PdfParser
 
         }
 
-        private static void MiamiAgendaItem(string pdfText)
+        private static void MiamiMeetingMinutes()
+        {
+            PdfDocument doc = new PdfDocument();
+
+            doc.LoadFromFile(@"C:\Projects\Regular Meeting 01-10-2019\2019-01-10 City Commission - Full Agenda-2032.pdf");
+
+            StringBuilder buffer = new StringBuilder();
+            var pdfText = string.Empty;
+
+            var mayoralVetoresStart = false;
+            var mayoralVetoresEnd = false;
+            var consentAgendaStart = false;
+            var consentAgendaEnd = false;
+
+            for (int i = 0; i < doc.Pages.Count; i++)
+            {
+                var pageBase = doc.Pages[i];
+                buffer.Append(pageBase.ExtractText());
+                pdfText = buffer.ToString();
+
+                if (pdfText == null) return;
+
+                if (pdfText.Contains("MV - MAYORAL VETOES"))
+                {
+                    mayoralVetoresStart = true;
+                }
+
+                if (pdfText.Contains("END OF MAYORAL VETOES"))
+                {
+                    mayoralVetoresEnd = true;
+                }
+
+                if (pdfText.Contains("CA - CONSENT AGENDA"))
+                {
+                    consentAgendaStart = true;
+                }
+
+                if (pdfText.Contains("END OF CONSENT AGENDA"))
+                {
+                    consentAgendaEnd = true;
+                }
+
+                if (pdfText.Contains("PH - PUBLIC HEARINGS"))
+                {
+                    
+                }
+
+                if (pdfText.Contains("END OF PUBLIC HEARINGS"))
+                {
+
+                }
+
+                if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF SECOND READING ORDINANCES"))
+                {
+
+                }
+
+                if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF FIRST READING ORDINANCES"))
+                {
+
+                }
+
+                if (pdfText.Contains("RE - RESOLUTIONS"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF RESOLUTIONS"))
+                {
+
+                }
+
+                if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF ATTORNEY-CLIENT SESSION"))
+                {
+
+                }
+
+                if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF BOARDS AND COMMITTEES"))
+                {
+
+                }
+
+                if (pdfText.Contains("DI - DISCUSSION ITEMS"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF DISCUSSION ITEMS"))
+                {
+
+                }
+
+                if (pdfText.Contains("D3 - DISTRICT 3"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF DISTRICT 3"))
+                {
+
+                }
+
+                if (pdfText.Contains("FL - FUTURE LEGISLATION"))
+                {
+
+                }
+
+                if (pdfText.Contains("END OF FUTURE LEGISLATION"))
+                {
+
+                }
+            }
+
+            //foreach (PdfPageBase pageBase in doc.Pages)
+            //{
+            //    buffer.Append(pageBase.ExtractText());
+            //}
+
+            doc.Close();
+
+            //var pdfText = buffer.ToString();
+        }
+
+        private static void MiamiAgendaItem()
         {
             // City of Miami Agenda Item
+
+            PdfDocument doc = new PdfDocument();
+            doc.LoadFromFile(@"C:\Projects\Snapshot-29208 (1).pdf");
+
+            StringBuilder buffer = new StringBuilder();
+
+
+            foreach (PdfPageBase pageBase in doc.Pages)
+            {
+                buffer.Append(pageBase.ExtractText());
+            }
+
+            doc.Close();
+
+            var pdfText = buffer.ToString();
 
             var _breakline = "\r\n";
             var _fileId = "File ID:";
