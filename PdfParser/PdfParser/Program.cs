@@ -14,7 +14,7 @@ namespace PdfParser
         {
             //Create a pdf document
 
-            MiamiMeetingMinutes();
+            var result = MiamiMeetingMinutes();
 
             
 
@@ -31,9 +31,10 @@ namespace PdfParser
 
         }
 
-        private static void MiamiMeetingMinutes()
+        private static MiamiMeetingData MiamiMeetingMinutes()
         {
             PdfDocument doc = new PdfDocument();
+            var miamiMeetingMinutes = new MiamiMeetingData();
 
             doc.LoadFromFile(@"C:\Users\User\OneDrive\Projects\Regular Meeting\01-10-2019\Meeting.pdf");
 
@@ -72,7 +73,7 @@ namespace PdfParser
 
                 if (consentAgendaStart)
                 {
-                    GetConsentAgendaResult(doc.Pages, i);
+                   miamiMeetingMinutes.ConsentAgenda = GetConsentAgendaResult(doc.Pages, i);
                 }
 
                 if (pdfText.Contains("END OF CONSENT AGENDA"))
@@ -184,158 +185,9 @@ namespace PdfParser
             //var pdfText = buffer.ToString();
         }
 
-        private static void GetConsentAgendaResult(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex)
+        private static ConsentAgenda GetConsentAgendaResult(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex)
         {
-            var consentAgenda = new ConsentAgenda();
-
-            var pdfText = string.Empty;
-            StringBuilder buffer = new StringBuilder();
-
-            var pageBase = pages[consentAgendaPageIndex];
-            buffer.Append(pageBase.ExtractText());
-            pdfText = buffer.ToString();
-
-            // Length = Next Paragraph title - Current Paragraph title
-
-            var _result = "RESULT:";
-            var _mover = "MOVER:";
-            var _seconder = "SECONDER:";
-            var _ayes = "AYES:";
-            var _absent = "ABSENT:";
-            var _ca1 = "CA.1";
-
-            //var _resolution = "RESOLUTION";
-            //var _resoltutionHeaderSpace = "RESOLUTION \r\n";
-            //var _enactmentNumber = "ENACTMENT NUMBER:";
-            //var _agendaItemEnd = "This matter was ADOPTED on the Consent Agenda.";
-
-            var resultLength = 0;
-            var moverLength = 0;
-            var seconderLength = 0;
-            var ayesLength = 0;
-            var absentLength = 0;
-
-
-            var result = string.Empty;
-            var mover = string.Empty;
-            var seconder = string.Empty;
-            //var ayes = string.Empty;
-            //var absent = string.Empty;
-
-            var resolutionNumber = string.Empty;
-            var enactmentNumber = string.Empty;
-
-            if (pdfText.Contains("The following item(s) was Adopted on the Consent Agenda"))
-            {
-                if (pdfText.Contains(_result))
-                {
-                    resultLength = pdfText.IndexOf(_mover) - pdfText.IndexOf(_result);
-                }
-                if (pdfText.Contains(_mover))
-                {
-                    moverLength = pdfText.IndexOf(_seconder) - pdfText.IndexOf(_mover);
-                }
-                if (pdfText.Contains(_seconder))
-                {
-                    seconderLength = pdfText.IndexOf(_ayes) - pdfText.IndexOf(_seconder);
-                }
-                if (pdfText.Contains(_ayes))
-                {
-                    ayesLength = pdfText.IndexOf(_absent) - pdfText.IndexOf(_ayes);
-                }
-                if (pdfText.Contains(_absent))
-                {
-                    absentLength = pdfText.IndexOf(_ca1) - pdfText.IndexOf(_absent);
-                }
-
-                // Value = Index of Value title + Length of title
-                consentAgenda.Result = pdfText.Substring(pdfText.IndexOf(_result) + _result.Length, 30).Trim();
-                mover = pdfText.Substring(pdfText.IndexOf(_mover) + _mover.Length, 40).Trim();
-                seconder = pdfText.Substring(pdfText.IndexOf(_seconder) + _seconder.Length, 40).Trim();
-                consentAgenda.Ayes.AddRange(pdfText.Substring(pdfText.IndexOf(_ayes) + _ayes.Length, 40).Trim().Split(',').ToList());
-                consentAgenda.Absent.AddRange(pdfText.Substring(pdfText.IndexOf(_absent) + _absent.Length, 30).Trim().Split(',').ToList());
-
-                //var ca1_Start = pdfText.IndexOf(_ca1);
-                //var o = pdfText.Substring(ca1_Start, 143);
-                consentAgenda.Movers.Add(mover);
-                consentAgenda.Seconders.Add(seconder);
-                consentAgenda.Resolutions = GetConsentAgendaResolutions(pages, consentAgendaPageIndex);
-                
-                //if (pdfText.Contains(_agendaItemEnd))
-                //{
-                //    var t = pdfText.IndexOf(_agendaItemEnd) + _agendaItemEnd.Length;
-                //    var u = pdfText
-                //}
-            }
-        }
-
-        private static List<MeetingItem> GetConsentAgendaResolutions(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex)
-        {
-            var resolutions = new List<MeetingItem>();
-
-            //var _resolution = "RESOLUTION";
-            var _endOfConsentAgenda = "END OF CONSENT AGENDA";
-
-            var pdfText = string.Empty;
-            StringBuilder buffer = new StringBuilder();
-
-            var pageBase = pages[consentAgendaPageIndex];
-            buffer.Append(pageBase.ExtractText());
-            pdfText = buffer.ToString();
-
-            var _consentAgendaEnd = "END OF CONSENT AGENDA";
-
-            while (!pdfText.Contains(_consentAgendaEnd))
-            {
-                resolutions.AddRange(GetResolutions(pdfText));
-
-                buffer.Clear();
-                pageBase = pages[++consentAgendaPageIndex];
-                buffer.Append(pageBase.ExtractText());
-                pdfText = buffer.ToString();
-            }
-
-            var endOfConsentIndex = pdfText.IndexOf(_endOfConsentAgenda);
-            var textBeforeEndOfConsent = pdfText.Substring(0, endOfConsentIndex);
-
-            resolutions.AddRange(GetResolutions(textBeforeEndOfConsent));
-
-            return resolutions;
-        }
-
-        private static List<MeetingItem> GetResolutions(string pdfText)
-        {
-            var resolutions = new List<MeetingItem>();
-
-            var indexOfResolution = 0;
-            var _resolution = "RESOLUTION";
-            var _resoltutionHeaderSpace = "RESOLUTION \r\n";
-            var _enactmentNumber = "ENACTMENT NUMBER:";
-
-            var resolutionNumber = string.Empty;
-            var enactmentNumber = string.Empty;
-
-            // Paragraph = Index of title + title length, Paragraph length - next title length
-            while (pdfText.Contains(_resolution))
-            {
-                indexOfResolution = pdfText.IndexOf(_resolution);
-                resolutionNumber = pdfText.Substring(indexOfResolution, 40).Replace(_resoltutionHeaderSpace, string.Empty).Trim();
-                enactmentNumber = pdfText.Substring(pdfText.IndexOf(_enactmentNumber) + _enactmentNumber.Length, 30).Trim();
-                var resolutionBodyLength = pdfText.IndexOf(_enactmentNumber) - pdfText.IndexOf(_resolution);
-                var resolutionBody = pdfText.Substring(pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength);
-                var endOfResolution = pdfText.IndexOf(enactmentNumber) + enactmentNumber.Length;
-
-                pdfText = pdfText.Substring(endOfResolution, pdfText.Length - endOfResolution);
-
-                resolutions.Add(new MeetingItem
-                {
-                    ItemNumber = resolutionNumber,
-                    EnactmentNumber = enactmentNumber,
-                    Body = resolutionBody
-                });
-            }
-
-            return resolutions;
+            return new ConsentAgenda(pages, consentAgendaPageIndex);
         }
 
         private static void MiamiAgendaItem()
