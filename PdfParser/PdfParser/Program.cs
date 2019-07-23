@@ -54,7 +54,7 @@ namespace PdfParser
                 buffer.Append(pageBase.ExtractText());
                 pdfText = buffer.ToString();
 
-                if (pdfText == null) return;
+                //if (pdfText == null) return;
 
                 if (pdfText.Contains("MV - MAYORAL VETOES"))
                 {
@@ -183,6 +183,7 @@ namespace PdfParser
             doc.Close();
 
             //var pdfText = buffer.ToString();
+            return miamiMeetingMinutes;
         }
 
         private static ConsentAgenda GetConsentAgendaResult(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex)
