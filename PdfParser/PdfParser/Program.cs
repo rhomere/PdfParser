@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Spire.Pdf;
+using Spire.Pdf.Widget;
 
 namespace PdfParser
 {
@@ -45,6 +46,8 @@ namespace PdfParser
             var mayoralVetoresEnd = false;
             var consentAgendaStart = false;
             var consentAgendaEnd = false;
+            var publicHearingStart = false;
+            var publicHearingEnd = false;
 
             for (int i = 0; i < doc.Pages.Count; i++)
             {
@@ -61,6 +64,11 @@ namespace PdfParser
                     mayoralVetoresStart = true;
                 }
 
+                if (mayoralVetoresStart && !mayoralVetoresEnd)
+                {
+                    miamiMeetingMinutes.MayoralVeotes = GetMayoralVetoes(doc.Pages, i);
+                }
+
                 if (pdfText.Contains("END OF MAYORAL VETOES"))
                 {
                     mayoralVetoresEnd = true;
@@ -71,24 +79,31 @@ namespace PdfParser
                     consentAgendaStart = true;
                 }
 
-                if (consentAgendaStart)
+                if (consentAgendaStart && !miamiMeetingMinutes.ConsentAgenda.ConsentAgendComplete)
                 {
-                   miamiMeetingMinutes.ConsentAgenda = GetConsentAgendaResult(doc.Pages, i);
-                }
-
-                if (pdfText.Contains("END OF CONSENT AGENDA"))
-                {
+                    miamiMeetingMinutes.ConsentAgenda = GetConsentAgendaResult(doc.Pages, i, out i);
+                    pageCounter = i - 1;
                     consentAgendaEnd = true;
                 }
 
+                //if (pdfText.Contains("END OF CONSENT AGENDA"))
+                //{
+                //    consentAgendaEnd = true;
+                //}
+
                 if (pdfText.Contains("PH - PUBLIC HEARINGS"))
                 {
-                    
+                    publicHearingStart = true;
+                }
+
+                if (publicHearingStart && !publicHearingEnd)
+                {
+                    miamiMeetingMinutes.PublicHearings = GetPublicHearing(doc.Pages, i);
                 }
 
                 if (pdfText.Contains("END OF PUBLIC HEARINGS"))
                 {
-
+                    publicHearingEnd = true;
                 }
 
                 if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
@@ -186,9 +201,19 @@ namespace PdfParser
             return miamiMeetingMinutes;
         }
 
-        private static ConsentAgenda GetConsentAgendaResult(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex)
+        private static PublicHearings GetPublicHearing(PdfPageCollection pages, int index)
         {
-            return new ConsentAgenda(pages, consentAgendaPageIndex);
+            return new PublicHearings(pages, index);
+        }
+
+        private static MayoralVetoes GetMayoralVetoes(PdfPageCollection pages, int mayoralVetoPageIndex)
+        {
+            return new MayoralVetoes(pages, mayoralVetoPageIndex);
+        }
+
+        private static ConsentAgenda GetConsentAgendaResult(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex, out int outIndex)
+        {
+            return new ConsentAgenda(pages, consentAgendaPageIndex, out outIndex);
         }
 
         private static void MiamiAgendaItem()
