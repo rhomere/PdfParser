@@ -82,7 +82,8 @@ namespace PdfParser
                 if (consentAgendaStart && !miamiMeetingMinutes.ConsentAgenda.ConsentAgendComplete)
                 {
                     miamiMeetingMinutes.ConsentAgenda = GetConsentAgendaResult(doc.Pages, i, out i);
-                    pageCounter = i - 1;
+                    i = i--;
+                    pageCounter = i;
                     consentAgendaEnd = true;
                 }
 
