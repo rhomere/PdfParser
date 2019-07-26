@@ -67,6 +67,7 @@ namespace PdfParser
         private string _cityOfMiami = "City of Miami";// Problematic because "City of Miami" may exist in resolution body
         private string _textToRemove = "Evaluation Warning : The document was created with Spire.PDF for .NET.";
         private string _textToRemove2 = "City Commission                                          Marked Agenda                                            ";
+        private bool _splitPage { get; set; }
 
         private int _index { get; set; } = 0;
         private string _pdfText { get; set; }
@@ -92,6 +93,11 @@ namespace PdfParser
                 _buffer.Append(_pageBase.ExtractText());
                 _pdfText = _buffer.ToString();
             }
+
+            var endOfPHIndex = _pdfText.IndexOf("END OF PUBLIC HEARINGS");
+            var _pdftext = _pdfText.Substring(0, endOfPHIndex);
+
+            LoadResolutions();
         }
 
         private void LoadResolutions()
@@ -120,6 +126,7 @@ namespace PdfParser
                 }
                 else
                 {
+                    _splitPage = true;
                     // Get first half of resolution
                     resolutionBodyLength = (_pdfText.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _pdfText.IndexOf(_resolution);
                     resolutionBody = _pdfText.Substring(_pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength).TrimEnd();
@@ -133,6 +140,34 @@ namespace PdfParser
                     // Get second half of resolution
                     resolutionBody += _pdfText.Substring(0, _pdfText.IndexOf(_motionTo)).TrimEnd();
                     resolutionBody = resolutionBody.Replace(_textToRemove, string.Empty).Replace(_textToRemove2, string.Empty).Replace("January 10, 2019", string.Empty).TrimStart();
+
+                    motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
+                    movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                    absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+
+                    var end = _pdfText.IndexOf("\r\n                                                  \r\n                                                   ");
+
+
+                    // Clear resolution we've just done
+                    _pdfText = _pdfText.Substring(end, _pdfText.Length - end);
+
+                    PublicHearingResolutions.Add(new PublicHearingResolution
+                    {
+                        ItemNumber = resolutionNumber,
+                        EnactmentNumber = enactmentNumber,
+                        Body = resolutionBody,
+                        MotionTo = motionTo,
+                        Result = result,
+                        Movers = movers,
+                        Seconders = seconders,
+                        Ayes = ayes,
+                        Absent = absent
+                    });
+                    continue;
+
                 }
 
                 motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
@@ -146,7 +181,7 @@ namespace PdfParser
                 resolutionBody = _pdfText.Substring(_pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength);
                 var endOfResolution = _pdfText.IndexOf(enactmentNumber) + enactmentNumber.Length;
 
-                // Clear last resolution
+                // Clear resolution we've just done
                 _pdfText = _pdfText.Substring(endOfResolution, _pdfText.Length - endOfResolution);
 
                 PublicHearingResolutions.Add(new PublicHearingResolution
