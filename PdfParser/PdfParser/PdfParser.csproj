@@ -49,10 +49,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base.cs" />
     <Compile Include="ConsentAgenda.cs" />
+    <Compile Include="MayoralVetoes.cs" />
+    <Compile Include="MeetingItem.cs" />
     <Compile Include="MiamiMeetingData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PublicHearings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
