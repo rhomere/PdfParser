@@ -82,9 +82,28 @@ namespace PdfParser
                 if (consentAgendaStart && !miamiMeetingMinutes.ConsentAgenda.ConsentAgendComplete)
                 {
                     miamiMeetingMinutes.ConsentAgenda = GetConsentAgendaResult(doc.Pages, i, out i);
-                    i = i--;
-                    pageCounter = i;
                     consentAgendaEnd = true;
+
+                    // If text contains next section (Public Hearing) continue
+                    // Otherwise increment page count.
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
+
+                    if (pdfText.Contains("PH - PUBLIC HEARINGS"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
+                    //i = i--;
+                    //pageCounter = i;
                 }
 
                 //if (pdfText.Contains("END OF CONSENT AGENDA"))
@@ -99,7 +118,25 @@ namespace PdfParser
 
                 if (publicHearingStart && !publicHearingEnd)
                 {
-                    miamiMeetingMinutes.PublicHearings = GetPublicHearing(doc.Pages, i);
+                    miamiMeetingMinutes.PublicHearings = GetPublicHearing(doc.Pages, i, out i);
+                    publicHearingEnd = true;
+
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
+
+                    if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("END OF PUBLIC HEARINGS"))
@@ -202,9 +239,9 @@ namespace PdfParser
             return miamiMeetingMinutes;
         }
 
-        private static PublicHearings GetPublicHearing(PdfPageCollection pages, int index)
+        private static PublicHearings GetPublicHearing(PdfPageCollection pages, int index, out int outIndex)
         {
-            return new PublicHearings(pages, index);
+            return new PublicHearings(pages, index, out outIndex);
         }
 
         private static MayoralVetoes GetMayoralVetoes(PdfPageCollection pages, int mayoralVetoPageIndex)

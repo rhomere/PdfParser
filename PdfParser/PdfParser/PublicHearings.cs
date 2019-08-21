@@ -32,9 +32,9 @@ namespace PdfParser
 
         public List<PublicHearingResolution> PublicHearingResolutions { get; set; } = new List<PublicHearingResolution>();
 
-        public PublicHearings(PdfPageCollection pages, int publicHearinsIndex)
+        public PublicHearings(PdfPageCollection pages, int publicHearingsIndex, out int outIndex)
         {
-            _index = publicHearinsIndex;
+            _index = publicHearingsIndex;
             _pages = pages;
             _pageBase = pages[_index];
             _buffer.Append(_pageBase.ExtractText());
@@ -53,6 +53,8 @@ namespace PdfParser
             var _pdftext = _pdfText.Substring(0, endOfPHIndex);
 
             LoadResolutions();
+
+            outIndex = _index;
         }
 
         private void LoadResolutions()
