@@ -48,6 +48,8 @@ namespace PdfParser
             var consentAgendaEnd = false;
             var publicHearingStart = false;
             var publicHearingEnd = false;
+            var secondReadingStart = false;
+            var secondReadingEnd = false;
 
             for (int i = 0; i < doc.Pages.Count; i++)
             {
@@ -139,20 +141,38 @@ namespace PdfParser
                     }
                 }
 
-                if (pdfText.Contains("END OF PUBLIC HEARINGS"))
-                {
-                    publicHearingEnd = true;
-                }
+                //if (pdfText.Contains("END OF PUBLIC HEARINGS"))
+                //{
+                //    publicHearingEnd = true;
+                //}
 
                 if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
                 {
+                    miamiMeetingMinutes.SecondReadings = GetSecondReading(doc.Pages, i, out i);
+                    secondReadingEnd = true;
 
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
+
+                    if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
-                if (pdfText.Contains("END OF SECOND READING ORDINANCES"))
-                {
+                //if (pdfText.Contains("END OF SECOND READING ORDINANCES"))
+                //{
 
-                }
+                //}
 
                 if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
                 {
@@ -237,6 +257,11 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static SecondReading GetSecondReading(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new SecondReading(pages, index, out outIndex);
         }
 
         private static PublicHearings GetPublicHearing(PdfPageCollection pages, int index, out int outIndex)

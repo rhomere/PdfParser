@@ -13,5 +13,6 @@ namespace PdfParser
         public ConsentAgenda ConsentAgenda { get; set; } = new ConsentAgenda();
         public MayoralVetoes MayoralVeotes { get; set; }
         public PublicHearings PublicHearings { get; set; }
+        public SecondReading SecondReadings { get; set; }
     }
 }
