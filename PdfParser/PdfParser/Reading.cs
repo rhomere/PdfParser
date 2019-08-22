@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PdfParser
 {
-    public class SecondReading : Base
+    public class Reading : Base
     {
         private string _resolution = "ORDINANCE";
         private string _resoltutionHeaderSpace = "ORDINANCE \r\n";
@@ -18,17 +18,17 @@ namespace PdfParser
         private string _textToRemove2 = "City Commission                                          Marked Agenda                                            ";
         private bool _splitPage { get; set; }
 
-        public List<SecondReadingOrdinance> SecondReadingOrdinances { get; set; } = new List<SecondReadingOrdinance>();
+        public List<ReadingOrdinance> ReadingOrdiances { get; set; } = new List<ReadingOrdinance>();
 
-        public SecondReading(PdfPageCollection pages, int publicHearingsIndex, out int outIndex)
+        public Reading(PdfPageCollection pages, int publicHearingsIndex, out int outIndex)
         {
             _index = publicHearingsIndex;
             _pages = pages;
             _pageBase = pages[_index];
             _buffer.Append(_pageBase.ExtractText());
             _pdfText = _buffer.ToString();
-
-            while (!_pdfText.Contains("END OF SECOND READING ORDINANCES"))
+            // Pass in FIRST OR SECOND
+            while (!_pdfText.Contains("END OF FIRST READING ORDINANCES"))
             {
                 LoadOrdinances();
                 //_buffer.Clear();
@@ -36,8 +36,8 @@ namespace PdfParser
                 //_buffer.Append(_pageBase.ExtractText());
                 //_pdfText = _buffer.ToString();
             }
-
-            var endOfSRIndex = _pdfText.IndexOf("END OF SECOND READING ORDINANCES");
+            // Pass in FIRST OR SECOND
+            var endOfSRIndex = _pdfText.IndexOf("END OF FIRST READING ORDINANCES");
             var _pdftext = _pdfText.Substring(0, endOfSRIndex);
 
             LoadOrdinances();
@@ -50,7 +50,8 @@ namespace PdfParser
             var indexOfResolution = 0;
 
             // Paragraph = Index of title + title length, Paragraph length - next title length
-            while (!_pdfText.Contains("END OF SECOND READING ORDINANCES") && _pdfText.Contains(_resolution))
+            // Pass in FIRST OR SECOND
+            while (!_pdfText.Contains("END OF FIRST READING ORDINANCES") && _pdfText.Contains(_resolution))
             {
                 var ordinanceNumber = string.Empty;
                 var motionTo = string.Empty;
@@ -118,7 +119,7 @@ namespace PdfParser
                         absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
                     }
 
-                    SecondReadingOrdinances.Add(new SecondReadingOrdinance
+                    ReadingOrdinances.Add(new ReadingOrdinance
                     {
                         ItemNumber = ordinanceNumber,
                         EnactmentNumber = enactmentNumber,
@@ -184,7 +185,7 @@ namespace PdfParser
                     _pdfText = _pdfText.Substring(endOfResolution, _pdfText.Length - endOfResolution);
                 }
 
-                SecondReadingOrdinances.Add(new SecondReadingOrdinance
+                ReadingOrdinances.Add(new ReadingOrdinance
                 {
                     ItemNumber = ordinanceNumber,
                     EnactmentNumber = enactmentNumber,
@@ -197,11 +198,10 @@ namespace PdfParser
                     Absent = absent
                 });
             }
-
         }
     }
 
-    public class SecondReadingOrdinance
+    public class ReadingOrdinance
     {
         private string _pdfText { get; set; }
         private StringBuilder _buffer { get; set; } = new StringBuilder();
@@ -225,7 +225,7 @@ namespace PdfParser
         public List<string> Ayes { get; set; }
         public List<string> Absent { get; set; }
 
-        public SecondReadingOrdinance()
+        public ReadingOrdinance()
         {
             Movers = new List<string>();
             Seconders = new List<string>();

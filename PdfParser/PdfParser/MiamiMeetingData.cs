@@ -14,5 +14,6 @@ namespace PdfParser
         public MayoralVetoes MayoralVeotes { get; set; }
         public PublicHearings PublicHearings { get; set; }
         public SecondReading SecondReadings { get; set; }
+        public Reading FirstReadings { get; set; }
     }
 }

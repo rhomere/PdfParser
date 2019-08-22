@@ -176,7 +176,7 @@ namespace PdfParser
 
                 if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
                 {
-
+                    miamiMeetingMinutes.FirstReadings = GetFirstReading(doc.Pages, i, out i);
                 }
 
                 if (pdfText.Contains("END OF FIRST READING ORDINANCES"))
@@ -257,6 +257,11 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static Reading GetFirstReading(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new Reading(pages, index, out outIndex);
         }
 
         private static SecondReading GetSecondReading(PdfPageCollection pages, int index, out int outIndex)
