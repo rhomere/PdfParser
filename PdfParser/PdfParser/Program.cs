@@ -203,7 +203,24 @@ namespace PdfParser
 
                 if (pdfText.Contains("RE - RESOLUTIONS"))
                 {
+                    miamiMeetingMinutes.Resolutions = GetResolutions(doc.Pages, i, out i);
 
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
+
+                    if (pdfText.Contains("ATTORNEY-CLIENT SESSION"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("END OF RESOLUTIONS"))
@@ -274,6 +291,11 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static Resolution GetResolutions(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new Resolution(pages, index, out outIndex);
         }
 
         private static Reading GetFirstReading(PdfPageCollection pages, int index, out int outIndex)

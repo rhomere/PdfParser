@@ -15,5 +15,6 @@ namespace PdfParser
         public PublicHearings PublicHearings { get; set; }
         public SecondReading SecondReadings { get; set; }
         public Reading FirstReadings { get; set; }
+        public Resolution Resolutions { get; set; }
     }
 }
