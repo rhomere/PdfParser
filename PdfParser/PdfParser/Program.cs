@@ -177,12 +177,29 @@ namespace PdfParser
                 if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
                 {
                     miamiMeetingMinutes.FirstReadings = GetFirstReading(doc.Pages, i, out i);
+
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
+
+                    if (pdfText.Contains("RE - RESOLUTIONS"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
-                if (pdfText.Contains("END OF FIRST READING ORDINANCES"))
-                {
+                //if (pdfText.Contains("END OF FIRST READING ORDINANCES"))
+                //{
 
-                }
+                //}
 
                 if (pdfText.Contains("RE - RESOLUTIONS"))
                 {
