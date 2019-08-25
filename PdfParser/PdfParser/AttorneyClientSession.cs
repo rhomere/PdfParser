@@ -55,6 +55,11 @@ namespace PdfParser
             var agendaReadingNumber = "AC.";
             var startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
 
+            // Get Page #
+            var pageFooterTerm = "City of Miami                                                 Page ";
+            var pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
+            var pageNumber = _.Substring(pageFooterIndex, 2);
+
             if (!singlePage)
             {
                 // Paragraph = Index of title + title length, Paragraph length - next title length
@@ -83,7 +88,63 @@ namespace PdfParser
                     // or it there is a consistent ". " space after the period.
                     //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
                     itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(_motionTo) - 1));
-                }
+
+                    if (_.Contains(_motionTo))
+                    {
+                        // Clear resolution
+                        _ = _.Remove(0, _.IndexOf(_motionTo));
+
+                        // Get vote info
+                        motionTo = _.Substring(_.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                        result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
+                        movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
+                        seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                        ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                        absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                    }
+                    else
+                    {
+                        // Clear resolution
+                        throw new Exception("Find way to clear resolution");
+
+                        // Get vote info
+                        //motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                        //result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
+                        //movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
+                        //seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                        //ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                        //absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                    }
+
+                    // Add Item
+                    AttorneyClientSessionItems.Add(new AttorneyClientSessionItem
+                    {
+                        ItemNumber = itemNumber,
+                        EnactmentNumber = enactmentNumber,
+                        Body = itemBody,
+                        MotionTo = motionTo,
+                        Result = result,
+                        Movers = movers,
+                        Seconders = seconders,
+                        Ayes = ayes,
+                        Absent = absent
+                    });
+                    counter++;
+                    startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
+
+                    if (_.Contains(startOfResolution))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        // Next page
+                        _buffer.Clear();
+                        _pageBase = _pages[++_index];
+                        _buffer.Append(_pageBase.ExtractText());
+                        _ = _buffer.ToString();
+                    }
+                }   
             }
         }
     }
