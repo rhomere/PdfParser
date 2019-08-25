@@ -137,6 +137,7 @@ namespace PdfParser
                     // Remove votes and check for end of section and break
                     _ = _.Remove(0, _.IndexOf(_absent) + 40);
 
+                    // Maybe be pre-mature to break here, what if there is another Item?
                     if (_.Contains(_end))
                     {
                         break;

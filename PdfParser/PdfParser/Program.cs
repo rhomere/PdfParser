@@ -207,16 +207,28 @@ namespace PdfParser
                 if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
                 {
                     miamiMeetingMinutes.AttorneyClientSession = GetAttorneyClientSession(doc.Pages, i, out i);
-                }
 
-                if (pdfText.Contains("END OF ATTORNEY-CLIENT SESSION"))
-                {
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
 
+                    if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
                 {
-
+                    miamiMeetingMinutes.BoardsAndCommittee = GetMiamiMeetingMinutes(doc.Pages, i, out i);
                 }
 
                 if (pdfText.Contains("END OF BOARDS AND COMMITTEES"))
@@ -267,6 +279,11 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static BoardsAndCommittee GetMiamiMeetingMinutes(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new BoardsAndCommittee(pages, index, out outIndex);
         }
 
         private static AttorneyClientSession GetAttorneyClientSession(PdfPageCollection pages, int index, out int outIndex)
