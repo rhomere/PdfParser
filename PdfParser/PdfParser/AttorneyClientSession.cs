@@ -63,7 +63,7 @@ namespace PdfParser
                 while (_pdfText.Contains(startOfResolution))
                 {
                     // Declare variables
-                    var resolutionNumber = string.Empty;
+                    var itemNumber = string.Empty;
                     var motionTo = string.Empty;
                     var result = string.Empty;
                     var movers = new List<string>();
@@ -71,10 +71,17 @@ namespace PdfParser
                     var ayes = new List<string>();
                     var absent = new List<string>();
                     var enactmentNumber = string.Empty;
-                    var resolutionBodyLength = 0;
-                    var resolutionBody = string.Empty;
+                    var itemBodyLength = 0;
+                    var itemBody = string.Empty;
 
+                    indexOfItem = _pdfText.IndexOf(_attorneyClientSession);
+                    // Item # is from title of item plus a certain number of spaces, the length of the 
+                    // Item # should be 4 characters
+                    itemNumber = _attorneyClientSession = _pdfText.Substring(indexOfItem, 40).Replace(_attorneyClientSessionHeaderSpace, string.Empty).Trim();
 
+                    // Body length should be from startOfResolution to MotionTo: minus certain characters
+                    // or it there is a consistent ". " space after the period.
+                    itemBodyLength = (_pdfText.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _pdfText.IndexOf(_resolution);
                 }
             }
         }
