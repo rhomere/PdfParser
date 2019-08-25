@@ -108,11 +108,6 @@ namespace PdfParser
                     //pageCounter = i;
                 }
 
-                //if (pdfText.Contains("END OF CONSENT AGENDA"))
-                //{
-                //    consentAgendaEnd = true;
-                //}
-
                 if (pdfText.Contains("PH - PUBLIC HEARINGS"))
                 {
                     publicHearingStart = true;
@@ -141,10 +136,6 @@ namespace PdfParser
                     }
                 }
 
-                //if (pdfText.Contains("END OF PUBLIC HEARINGS"))
-                //{
-                //    publicHearingEnd = true;
-                //}
 
                 if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
                 {
@@ -169,11 +160,6 @@ namespace PdfParser
                     }
                 }
 
-                //if (pdfText.Contains("END OF SECOND READING ORDINANCES"))
-                //{
-
-                //}
-
                 if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
                 {
                     miamiMeetingMinutes.FirstReadings = GetFirstReading(doc.Pages, i, out i);
@@ -196,11 +182,6 @@ namespace PdfParser
                     }
                 }
 
-                //if (pdfText.Contains("END OF FIRST READING ORDINANCES"))
-                //{
-
-                //}
-
                 if (pdfText.Contains("RE - RESOLUTIONS"))
                 {
                     miamiMeetingMinutes.Resolutions = GetResolutions(doc.Pages, i, out i);
@@ -209,7 +190,7 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("ATTORNEY-CLIENT SESSION"))
+                    if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
                     {
                         continue;
                     }
@@ -221,11 +202,6 @@ namespace PdfParser
                         buffer.Append(pageBase.ExtractText());
                         pdfText = buffer.ToString();
                     }
-                }
-
-                if (pdfText.Contains("END OF RESOLUTIONS"))
-                {
-
                 }
 
                 if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
