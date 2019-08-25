@@ -82,7 +82,7 @@ namespace PdfParser
                     // Body length should be from startOfResolution to MotionTo: minus certain characters
                     // or it there is a consistent ". " space after the period.
                     //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), _.IndexOf(". "));
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(_motionTo) - 1));
                 }
             }
         }

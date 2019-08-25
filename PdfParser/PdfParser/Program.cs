@@ -206,7 +206,7 @@ namespace PdfParser
 
                 if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
                 {
-
+                    miamiMeetingMinutes.AttorneyClientSession = GetAttorneyClientSession(doc.Pages, i, out i);
                 }
 
                 if (pdfText.Contains("END OF ATTORNEY-CLIENT SESSION"))
@@ -267,6 +267,11 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static AttorneyClientSession GetAttorneyClientSession(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new AttorneyClientSession(pages, index, out outIndex);
         }
 
         private static Resolution GetResolutions(PdfPageCollection pages, int index, out int outIndex)

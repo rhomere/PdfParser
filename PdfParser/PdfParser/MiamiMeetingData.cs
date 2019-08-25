@@ -16,5 +16,6 @@ namespace PdfParser
         public SecondReading SecondReadings { get; set; }
         public Reading FirstReadings { get; set; }
         public Resolution Resolutions { get; set; }
+        public AttorneyClientSession AttorneyClientSession { get; set; }
     }
 }
