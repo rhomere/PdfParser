@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttorneyClientSession.cs" />
     <Compile Include="Base.cs" />
     <Compile Include="ConsentAgenda.cs" />
     <Compile Include="MayoralVetoes.cs" />
