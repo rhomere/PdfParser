@@ -29,7 +29,6 @@ namespace PdfParser
             _pageBase = pages[_index];
             _buffer.Append(_pageBase.ExtractText());
             _pdfText = _buffer.ToString();
-            // Pass in FIRST OR SECOND
 
             if (_pdfText.Contains(_start) && _pdfText.Contains(_end))
             {
@@ -44,7 +43,7 @@ namespace PdfParser
                 //_buffer.Append(_pageBase.ExtractText());
                 //_pdfText = _buffer.ToString();
             }
-            // Pass in FIRST OR SECOND
+
             var endOfSRIndex = _pdfText.IndexOf(_end);
             var _pdftext = _pdfText.Substring(0, endOfSRIndex);
 
@@ -62,7 +61,6 @@ namespace PdfParser
             if (!singlePage)
             {
                 // Paragraph = Index of title + title length, Paragraph length - next title length
-                // Pass in FIRST OR SECOND
                 while (!_pdfText.Contains(_end) && _pdfText.Contains(_resolution))
                 {
                     var resolutionNumber = string.Empty;

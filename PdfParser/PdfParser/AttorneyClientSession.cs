@@ -1,4 +1,5 @@
 ﻿using Spire.Pdf;
+using Spire.Pdf.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,66 @@ namespace PdfParser
         private string _start = "AC - ATTORNEY-CLIENT SESSION";
         private string _end = "END OF ATTORNEY-CLIENT SESSION";
 
+        public List<AttorneyClientSessionItem> AttorneyClientSessionItems { get; set; } = new List<AttorneyClientSessionItem>();
 
+        public AttorneyClientSession(PdfPageCollection pages, int index, out int outIndex)
+        {
+            _index = index;
+            _pages = pages;
+            _pageBase = pages[_index];
+            _buffer.Append(_pageBase.ExtractText());
+            _pdfText = _buffer.ToString();
+
+            // If Section is only one page
+            if (_pdfText.Contains(_start) && _pdfText.Contains(_end))
+            {
+                LoadAttorneyClientSessionItems(singlePage: true);
+            }
+
+            while (!_pdfText.Contains("END OF RESOLUTIONS"))
+            {
+                LoadAttorneyClientSessionItems();
+            }
+
+            // I think this removes the end of the section from the text
+            var endOfSRIndex = _pdfText.IndexOf(_end);
+            var _pdftext = _pdfText.Substring(0, endOfSRIndex);
+
+            LoadAttorneyClientSessionItems();
+
+            outIndex = _index;
+        }
+
+        private void LoadAttorneyClientSessionItems(bool singlePage = false)
+        {
+            var indexOfItem = 0;
+            var counter = 1;
+            var agendaReadingNumber = "AC.";
+            var startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
+
+            if (!singlePage)
+            {
+                // Paragraph = Index of title + title length, Paragraph length - next title length
+
+                // While text contains item
+                while (_pdfText.Contains(startOfResolution))
+                {
+                    // Declare variables
+                    var resolutionNumber = string.Empty;
+                    var motionTo = string.Empty;
+                    var result = string.Empty;
+                    var movers = new List<string>();
+                    var seconders = new List<string>();
+                    var ayes = new List<string>();
+                    var absent = new List<string>();
+                    var enactmentNumber = string.Empty;
+                    var resolutionBodyLength = 0;
+                    var resolutionBody = string.Empty;
+
+
+                }
+            }
+        }
     }
 
     public class AttorneyClientSessionItem
