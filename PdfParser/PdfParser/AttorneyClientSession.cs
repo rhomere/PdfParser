@@ -26,22 +26,22 @@ namespace PdfParser
             _pages = pages;
             _pageBase = pages[_index];
             _buffer.Append(_pageBase.ExtractText());
-            _pdfText = _buffer.ToString();
+            _ = _buffer.ToString();
 
             // If Section is only one page
-            if (_pdfText.Contains(_start) && _pdfText.Contains(_end))
+            if (_.Contains(_start) && _.Contains(_end))
             {
                 LoadAttorneyClientSessionItems(singlePage: true);
             }
 
-            while (!_pdfText.Contains("END OF RESOLUTIONS"))
+            while (!_.Contains("END OF RESOLUTIONS"))
             {
                 LoadAttorneyClientSessionItems();
             }
 
             // I think this removes the end of the section from the text
-            var endOfSRIndex = _pdfText.IndexOf(_end);
-            var _pdftext = _pdfText.Substring(0, endOfSRIndex);
+            var endOfSRIndex = _.IndexOf(_end);
+            var _pdftext = _.Substring(0, endOfSRIndex);
 
             LoadAttorneyClientSessionItems();
 
@@ -60,7 +60,7 @@ namespace PdfParser
                 // Paragraph = Index of title + title length, Paragraph length - next title length
 
                 // While text contains item
-                while (_pdfText.Contains(startOfResolution))
+                while (_.Contains(startOfResolution))
                 {
                     // Declare variables
                     var itemNumber = string.Empty;
@@ -74,14 +74,15 @@ namespace PdfParser
                     var itemBodyLength = 0;
                     var itemBody = string.Empty;
 
-                    indexOfItem = _pdfText.IndexOf(_attorneyClientSession);
+                    indexOfItem = _.IndexOf(_attorneyClientSession);
                     // Item # is from title of item plus a certain number of spaces, the length of the 
                     // Item # should be 4 characters
-                    itemNumber = _attorneyClientSession = _pdfText.Substring(indexOfItem, 40).Replace(_attorneyClientSessionHeaderSpace, string.Empty).Trim();
+                    itemNumber = _attorneyClientSession = _.Substring(indexOfItem, 40).Replace(_attorneyClientSessionHeaderSpace, string.Empty).Trim();
 
                     // Body length should be from startOfResolution to MotionTo: minus certain characters
                     // or it there is a consistent ". " space after the period.
-                    itemBodyLength = (_pdfText.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _pdfText.IndexOf(_resolution);
+                    //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), _.IndexOf(". "));
                 }
             }
         }

@@ -11,6 +11,7 @@ namespace PdfParser
     {
         internal int _index { get; set; } = 0;
         internal string _pdfText { get; set; }
+        internal string _ { get; set; }
         internal StringBuilder _buffer { get; set; } = new StringBuilder();
         internal PdfPageBase _pageBase { get; set; }
         internal Spire.Pdf.Widget.PdfPageCollection _pages { get; set; }
