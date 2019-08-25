@@ -34,7 +34,7 @@ namespace PdfParser
                 LoadAttorneyClientSessionItems(singlePage: true);
             }
 
-            while (!_.Contains("END OF RESOLUTIONS"))
+            while (!_.Contains(_end))
             {
                 LoadAttorneyClientSessionItems();
             }
@@ -54,11 +54,13 @@ namespace PdfParser
             var counter = 1;
             var agendaReadingNumber = "AC.";
             var startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
+            var oldStartOfResolution = string.Empty;
 
             // Get Page #
             var pageFooterTerm = "City of Miami                                                 Page ";
             var pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
             var pageNumber = _.Substring(pageFooterIndex, 2);
+            currentPageNumber = Int32.Parse(pageNumber);
 
             if (!singlePage)
             {
@@ -78,6 +80,8 @@ namespace PdfParser
                     var enactmentNumber = string.Empty;
                     var itemBodyLength = 0;
                     var itemBody = string.Empty;
+
+                    oldStartOfResolution = startOfResolution;
 
                     indexOfItem = _.IndexOf(_attorneyClientSession);
                     // Item # is from title of item plus a certain number of spaces, the length of the 
@@ -129,6 +133,16 @@ namespace PdfParser
                         Ayes = ayes,
                         Absent = absent
                     });
+
+                    // Remove votes and check for end of section and break
+                    _ = _.Remove(0, _.IndexOf(_absent) + 40);
+
+                    if (_.Contains(_end))
+                    {
+                        break;
+                    }
+
+
                     counter++;
                     startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
 
@@ -143,8 +157,20 @@ namespace PdfParser
                         _pageBase = _pages[++_index];
                         _buffer.Append(_pageBase.ExtractText());
                         _ = _buffer.ToString();
+
+                        // Get Page #
+                        pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
+                        pageNumber = _.Substring(pageFooterIndex, 2);
+                        newPageNumber = Int32.Parse(pageNumber);
+
+                        // If startOfItem doesn't match && page # is different && end of section doesn't exist
+                        // Possible intential duplicate item.
+                        if (newPageNumber > currentPageNumber && _.Contains(oldStartOfResolution))
+                        {
+                            LoadAttorneyClientSessionItems(false);
+                        }
                     }
-                }   
+                }  
             }
         }
     }
