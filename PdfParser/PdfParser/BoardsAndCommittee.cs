@@ -112,6 +112,21 @@ namespace PdfParser
                         itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf("APPOINTEE") - 1));
                     }
 
+                    // Appointees
+                    var t = _.IndexOf("NOMINATED BY: \r\n") + 18;
+                    _ = _.Remove(0, t);
+                    _ = _.TrimStart();
+                    //_ = _.Replace("                                                                                                               ", string.Empty);
+                    //_ = _.Replace("                                                                                                              \r\n", string.Empty);
+                    //_ = _.Replace("                                                                 ", string.Empty);
+
+                    // Loop through this process to get appointee and nominators
+                    var appointee = _.Substring(0, _.IndexOf("  "));
+                    _ = _.Replace(appointee, string.Empty);
+                    _ = _.TrimStart();
+                    var nominator = _.Substring(0, _.IndexOf("\r\n"));
+                    _ = _.Replace(nominator, string.Empty);
+
                     if (_.Contains(_motionTo))
                     {
                         // Clear resolution
