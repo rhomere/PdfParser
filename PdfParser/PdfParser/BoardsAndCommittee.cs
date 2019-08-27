@@ -112,31 +112,64 @@ namespace PdfParser
                         itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf("APPOINTEE") - 1));
                     }
 
+                    var appointeeAndNominators = new List<(string, string)>();
+
                     // Appointees
                     var t = _.IndexOf("NOMINATED BY: \r\n") + 18;
                     _ = _.Remove(0, t);
+                    _ = _.Remove(0, _.IndexOf("\r\n") + 4);
                     _ = _.TrimStart();
-                    //_ = _.Replace("                                                                                                               ", string.Empty);
-                    //_ = _.Replace("                                                                                                              \r\n", string.Empty);
-                    //_ = _.Replace("                                                                 ", string.Empty);
 
-                    // Loop through this process to get appointee and nominators
-                    var appointee = _.Substring(0, _.IndexOf("  "));
-
-                    // If appointee is any of the officials
-                    // set appointee to null
-                    if (IsAppointeeAnCityOfficial(appointee))
+                    while (CanParseAppointee(_))
                     {
-                        appointee = string.Empty;
-                    }
+                        var line = _.Substring(0, _.IndexOf("\r\n") + 4);
 
-                    if (!string.IsNullOrEmpty(appointee))
-                    {
-                        _ = _.Replace(appointee, string.Empty);
+                        // Loop through this process to get appointee and nominators
+                        var appointee = line.Substring(0, line.IndexOf("  "));
+
+                        // If appointee is any of the officials
+                        // set appointee to null
+                        if (IsAppointeeAnCityOfficial(appointee))
+                        {
+                            appointee = string.Empty;
+                        }
+
+                        if (!string.IsNullOrEmpty(appointee))
+                        {
+                            line = line.Replace(appointee, string.Empty);
+                        }
+
+                        line = line.TrimStart();
+                        var nominator = line.Substring(0, line.IndexOf("\r\n"));
+                        line = line.Replace(nominator, string.Empty);
+
+                        // Remove everything to the first breakLine (the appointee line we just processed)
+                        _ = _.Remove(0, _.IndexOf("\r\n") + 4);
+
+                        // If one breakLine to next official do current logic
+                        if (breakLineCount(_) == 1)
+                        {
+                            
+                        }
+                        else
+                        {
+                            // If two breakLines do new logic
+                            var secondLine = _.Substring(0, _.IndexOf("\r\n"));
+                            secondLine = secondLine.TrimStart().TrimEnd();
+
+                            if (!string.IsNullOrEmpty(secondLine))
+                            {
+                                appointee = secondLine;
+                            }
+                        }
+
+                        // Remove double space in between appointees
+                        _ = _.Remove(0, _.IndexOf("\r\n") + 4);
+
+                        _ = _.TrimStart();
+
+                        appointeeAndNominators.Add((appointee, nominator));
                     }
-                    _ = _.TrimStart();
-                    var nominator = _.Substring(0, _.IndexOf("\r\n"));
-                    _ = _.Replace(nominator, string.Empty);
 
                     if (_.Contains(_motionTo))
                     {
@@ -217,7 +250,18 @@ namespace PdfParser
                     }
 
                     // Add Item
-
+                    BoardsAndCommitteeItems.Add(new BoardsAndCommitteeItem
+                    {
+                        Body = itemBody,
+                        ItemNumber = itemNumber,
+                        MotionTo = motionTo,
+                        Result = result,
+                        Movers = movers,
+                        Seconders = seconders,
+                        Ayes = ayes,
+                        Absent = absent,
+                        AppointeesAndNominators = appointeeAndNominators
+                    });
 
                     if (!string.IsNullOrWhiteSpace(_pdfText))
                     {
@@ -265,6 +309,80 @@ namespace PdfParser
                         }
                     }
                 }
+            }
+        }
+
+        private int breakLineCount(string _)
+        {
+            var text = _;
+            var counter = 1;
+
+            // While does not contain official or end of section i.e. canParseAppointee is false
+            while (CanParseNominator(text) && CanMoveToNextLine(text))
+            {
+                text = text.Remove(0, text.IndexOf("\r\n") + 4);
+                counter++;
+            }
+
+            return counter;
+        }
+
+        private bool CanParseNominator(string _)
+        {
+            var text = _;
+
+            text = text.Remove(0, text.IndexOf("\r\n") + 4);
+
+            text = text.TrimStart();
+
+            if (CanMoveToNextLine(text))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool CanParseAppointee(string _)
+        {
+            var firstSixLetters = _.Substring(0, 6);
+
+            switch (firstSixLetters)
+            {
+                case "ENACTM":
+                    return false;
+                case "RESULT":
+                    return false;
+                case "MOTION":
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        private bool CanMoveToNextLine(string _)
+        {
+            var firstSixLetters = _.Substring(0, 6);
+
+            switch (firstSixLetters)
+            {
+                case "ENACTM":
+                    return false;
+                case "RESULT":
+                    return false;
+                case "MOTION":
+                    return false;
+                case "Chair ":
+                    return false;
+                case "Commis":
+                    return false;
+                case "City M":
+                    return false;
+                case "Vice C":
+                    return false;
+                case "Mayor ":
+                    return false;
+                default:
+                    return true;
             }
         }
 
@@ -330,7 +448,7 @@ namespace PdfParser
         public List<string> Seconders { get; set; }
         public List<string> Ayes { get; set; }
         public List<string> Absent { get; set; }
-        public List<(string, string)> AppointeesAndNominees { get; set; } = new List<(string, string)>();
+        public List<(string, string)> AppointeesAndNominators { get; set; } = new List<(string, string)>();
 
 
         public BoardsAndCommitteeItem()
