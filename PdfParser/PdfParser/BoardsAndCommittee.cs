@@ -149,11 +149,6 @@ namespace PdfParser
                         // If one breakLine to next official do current logic
                         if (breakLineCount(_) == 1)
                         {
-                            
-                        }
-                        else
-                        {
-                            // If two breakLines do new logic
                             var secondLine = _.Substring(0, _.IndexOf("\r\n"));
                             secondLine = secondLine.TrimStart().TrimEnd();
 
@@ -161,6 +156,20 @@ namespace PdfParser
                             {
                                 appointee = secondLine;
                             }
+                        }
+                        else
+                        {
+                            // Get text from next two breakLines
+                            var line1 = _.Substring(0, _.IndexOf("\r\n"));
+                            line1 = line1.Trim();
+
+                            var line2 = _.Remove(0, _.IndexOf("\r\n") + 4);
+                            line2 = line2.Substring(0, line2.IndexOf("\r\n"));
+                            line2 = line2.Trim();
+
+                            appointee = line1 + " " + line2;
+
+                            _ = _.Remove(0, _.IndexOf("\r\n") + 4);
                         }
 
                         // Remove double space in between appointees
