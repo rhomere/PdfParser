@@ -122,7 +122,18 @@ namespace PdfParser
 
                     // Loop through this process to get appointee and nominators
                     var appointee = _.Substring(0, _.IndexOf("  "));
-                    _ = _.Replace(appointee, string.Empty);
+
+                    // If appointee is any of the officials
+                    // set appointee to null
+                    if (IsAppointeeAnCityOfficial(appointee))
+                    {
+                        appointee = string.Empty;
+                    }
+
+                    if (!string.IsNullOrEmpty(appointee))
+                    {
+                        _ = _.Replace(appointee, string.Empty);
+                    }
                     _ = _.TrimStart();
                     var nominator = _.Substring(0, _.IndexOf("\r\n"));
                     _ = _.Replace(nominator, string.Empty);
@@ -255,6 +266,36 @@ namespace PdfParser
                     }
                 }
             }
+        }
+
+        private bool IsAppointeeAnCityOfficial(string appointee)
+        {
+            if (appointee.Contains("Keon Hardemon"))
+                return true;
+            if (appointee.Contains("Francis Suarez"))
+                return true;
+            if (appointee.Contains("Ken Russell"))
+                return true;
+            if (appointee.Contains("Manolo Reyes"))
+                return true;
+            if (appointee.Contains("Joe Carollo"))
+                return true;
+            if (appointee.Contains("Wifredo (Willy) Gort"))
+                return true;
+            if (appointee.Contains("Emilio T. Gonzalez"))
+                return true;
+            if (appointee.Contains("Commission-At-Large"))
+                return true;
+            if (appointee.Contains("IAFF"))
+                return true;
+            if (appointee.Contains("FOP"))
+                return true;
+            if (appointee.Contains("AFSCME 1907"))
+                return true;
+            if (appointee.Contains("AFSCME 871"))
+                return true;
+
+            return false;
         }
 
         private string GetItemHeader(string sectionItemNumber, int counter)
