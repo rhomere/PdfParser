@@ -18,5 +18,6 @@ namespace PdfParser
         public Resolution Resolutions { get; set; }
         public AttorneyClientSession AttorneyClientSession { get; set; }
         public BoardsAndCommittee BoardsAndCommittee { get; set; }
+        public DiscussionItemSection DiscussionItemSection { get; set; }
     }
 }

@@ -229,16 +229,28 @@ namespace PdfParser
                 if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
                 {
                     miamiMeetingMinutes.BoardsAndCommittee = GetMiamiMeetingMinutes(doc.Pages, i, out i);
-                }
 
-                if (pdfText.Contains("END OF BOARDS AND COMMITTEES"))
-                {
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
 
+                    if (pdfText.Contains("DI - DISCUSSION ITEMS"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("DI - DISCUSSION ITEMS"))
                 {
-
+                    miamiMeetingMinutes.DiscussionItemSection = GetDiscussionItems(doc.Pages, i, out i);
                 }
 
                 if (pdfText.Contains("END OF DISCUSSION ITEMS"))
@@ -279,6 +291,11 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static DiscussionItemSection GetDiscussionItems(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new DiscussionItemSection(pages, index, out outIndex);
         }
 
         private static BoardsAndCommittee GetMiamiMeetingMinutes(PdfPageCollection pages, int index, out int outIndex)
