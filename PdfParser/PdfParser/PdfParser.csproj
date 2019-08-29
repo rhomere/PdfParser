@@ -53,6 +53,7 @@
     <Compile Include="Base.cs" />
     <Compile Include="BoardsAndCommittee.cs" />
     <Compile Include="ConsentAgenda.cs" />
+    <Compile Include="DiscussionItemSection.cs" />
     <Compile Include="MayoralVetoes.cs" />
     <Compile Include="MeetingItem.cs" />
     <Compile Include="MiamiMeetingData.cs" />
