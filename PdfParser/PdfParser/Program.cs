@@ -296,10 +296,48 @@ namespace PdfParser
                 {
                     miamiMeetingMinutes.FutureLegislationSection = GetFutureLegislation(doc.Pages, i, out i);
 
-                    pageBase = doc.Pages[i];
-                    buffer.Append(pageBase.ExtractText());
-                    pdfText = buffer.ToString();
+                    //pageBase = doc.Pages[i];
+                    //buffer.Append(pageBase.ExtractText());
+                    //pdfText = buffer.ToString();
+
+                    break;
+                    //if(pdfText.Contains("NA - NON-AGENDA ITEM(S)"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
+
+                // Non Agenda Items contain Discussion Items, Resolutions 
+                // and Attorney Client Sessions
+                //if (pdfText.Contains("NA - NON-AGENDA ITEM(S)"))
+                //{
+                    
+
+                //    pageBase = doc.Pages[i];
+                //    buffer.Append(pageBase.ExtractText());
+                //    pdfText = buffer.ToString();
+
+                //    if (pdfText.Contains("NA - NON-AGENDA ITEM(S)"))
+                //    {
+                //        continue;
+                //    }
+                //    else
+                //    {
+                //        buffer.Clear();
+                //        i++;
+                //        pageBase = doc.Pages[i];
+                //        buffer.Append(pageBase.ExtractText());
+                //        pdfText = buffer.ToString();
+                //    }
+                //}
 
                 buffer.Clear();
                 pageCounter++;
