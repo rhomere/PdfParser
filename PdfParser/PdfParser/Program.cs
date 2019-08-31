@@ -251,11 +251,23 @@ namespace PdfParser
                 if (pdfText.Contains("DI - DISCUSSION ITEMS"))
                 {
                     miamiMeetingMinutes.DiscussionItemSection = GetDiscussionItems(doc.Pages, i, out i);
-                }
 
-                if (pdfText.Contains("END OF DISCUSSION ITEMS"))
-                {
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
 
+                    if (pdfText.Contains("D3 - DISTRICT 3"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("D3 - DISTRICT 3"))
