@@ -71,7 +71,7 @@ namespace PdfParser
                 indexOfItem = _.IndexOf(_discussionItem);
                 // Item # is from title of item plus a certain number of spaces, the length of the 
                 // Item # should be 4 characters
-                itemNumber = _discussionItem = _.Substring(indexOfItem, 40).Replace(_discussionItemHeaderSpace, string.Empty).Trim();
+                itemNumber = _.Substring(indexOfItem, 40).Replace(_discussionItemHeaderSpace, string.Empty).Trim();
 
                 // Check for next item
                 if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
@@ -88,14 +88,18 @@ namespace PdfParser
                 // or it there is a consistent ". " space after the period.
                 //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
                 var discussionItemEnd = "\r\n                                                  \r\n                                                   ";
-                try
+
+                if (_.Contains(_motionTo))
                 {
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(discussionItemEnd) - 1));
+                    itemBodyLength = (_.IndexOf(_motionTo) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength);
                 }
-                catch (ArgumentOutOfRangeException)
+                else if (_.Contains(_result))
                 {
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(_result) - 16));
+                    itemBodyLength = (_.IndexOf(_result) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength);
                 }
+                
 
                 if (_.Contains(_motionTo))
                 {
@@ -135,11 +139,11 @@ namespace PdfParser
                 counter++;
                 if (counter < 10)
                 {
-                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                          DISCUSSION ITEM ";
                 }
                 else
                 {
-                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         DISCUSSION ITEM ";
                 }
 
                 // Add Item
@@ -181,6 +185,11 @@ namespace PdfParser
                 {
                     break;
                 }
+                else
+                {
+                    //Increment page and continue
+                }
+
                 // Remove votes and check for end of section and break
                 //_ = _.Remove(0, _.IndexOf(_absent) + 40);
             }           
