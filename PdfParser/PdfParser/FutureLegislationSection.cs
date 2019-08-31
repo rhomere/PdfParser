@@ -220,7 +220,7 @@ namespace PdfParser
             public List<string> Ayes { get; set; }
             public List<string> Absent { get; set; }
 
-            public DiscussionItem()
+            public FutureLegislationItem()
             {
                 Movers = new List<string>();
                 Seconders = new List<string>();

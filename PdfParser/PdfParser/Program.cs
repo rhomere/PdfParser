@@ -299,8 +299,6 @@ namespace PdfParser
                     pageBase = doc.Pages[i];
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
-
-                    continue;
                 }
 
                 buffer.Clear();

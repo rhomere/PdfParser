@@ -41,7 +41,7 @@ namespace PdfParser
             var indexOfItem = 0;
             var counter = 1;
             var sectionItemNumber = "D3.";
-            var startOfResolution = $"{sectionItemNumber}{counter.ToString()}                          DISCUSSION ITEM";
+            var startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         DISCUSSION ITEM";
             var oldStartOfResolution = string.Empty;
 
             // Get Page #
@@ -138,11 +138,11 @@ namespace PdfParser
                 counter++;
                 if (counter < 10)
                 {
-                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                          DISCUSSION ITEM ";
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         DISCUSSION ITEM";
                 }
                 else
                 {
-                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         DISCUSSION ITEM ";
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        DISCUSSION ITEM";
                 }
 
                 // Add Item
