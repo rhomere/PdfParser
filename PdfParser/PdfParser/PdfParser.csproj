@@ -54,6 +54,7 @@
     <Compile Include="BoardsAndCommittee.cs" />
     <Compile Include="ConsentAgenda.cs" />
     <Compile Include="DiscussionItemSection.cs" />
+    <Compile Include="DistrictSection.cs" />
     <Compile Include="FutureLegislationSection.cs" />
     <Compile Include="MayoralVetoes.cs" />
     <Compile Include="MeetingItem.cs" />

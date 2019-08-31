@@ -272,22 +272,35 @@ namespace PdfParser
 
                 if (pdfText.Contains("D3 - DISTRICT 3"))
                 {
+                    miamiMeetingMinutes.District3Section = GetDisctrict3Section(doc.Pages, i, out i);
 
-                }
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
 
-                if (pdfText.Contains("END OF DISTRICT 3"))
-                {
-
+                    if (pdfText.Contains("FL - FUTURE LEGISLATION"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("FL - FUTURE LEGISLATION"))
                 {
+                    miamiMeetingMinutes.FutureLegislationSection = GetFutureLegislation(doc.Pages, i, out i);
 
-                }
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
 
-                if (pdfText.Contains("END OF FUTURE LEGISLATION"))
-                {
-
+                    continue;
                 }
 
                 buffer.Clear();
@@ -303,6 +316,16 @@ namespace PdfParser
 
             //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
+        }
+
+        private static FutureLegislationSection GetFutureLegislation(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new FutureLegislationSection(pages, index, out outIndex);
+        }
+
+        private static DistrictSection GetDisctrict3Section(PdfPageCollection pages, int index, out int outIndex)
+        {
+            return new DistrictSection(pages, index, out outIndex);
         }
 
         private static DiscussionItemSection GetDiscussionItems(PdfPageCollection pages, int index, out int outIndex)
