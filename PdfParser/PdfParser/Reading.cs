@@ -66,13 +66,12 @@ namespace PdfParser
 
                 oldStartOfResolution = startOfResolution;
 
-                // Clear everything StartOfResolution
+                // Clear everything up to StartOfResolution
                 _ = _.Remove(0, _.IndexOf(startOfResolution));
 
                 indexOfItem = _.IndexOf(_resolution);
                 // Item # is from title of item plus a certain number of spaces, the length of the 
                 // Item # should be 4 characters
-                var t = _.Substring(indexOfItem, 105);
                 itemNumber = _.Substring(indexOfItem, 105).Replace(_resolutionHeaderSpace, string.Empty).Trim();
 
                 // Check for next item
