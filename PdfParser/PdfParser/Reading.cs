@@ -28,25 +28,8 @@ namespace PdfParser
             _pages = pages;
             _pageBase = pages[_index];
             _buffer.Append(_pageBase.ExtractText());
-            _pdfText = _buffer.ToString();
+            _ = _buffer.ToString();
             // Pass in FIRST OR SECOND
-
-            if (_pdfText.Contains("FR - FIRST READING ORDINANCES") && _pdfText.Contains("END OF FIRST READING ORDINANCES"))
-            {
-                LoadOrdinances(true);
-            }
-
-            while (!_pdfText.Contains("END OF FIRST READING ORDINANCES"))
-            {
-                LoadOrdinances();
-                //_buffer.Clear();
-                //_pageBase = _pages[++_index];
-                //_buffer.Append(_pageBase.ExtractText());
-                //_pdfText = _buffer.ToString();
-            }
-            // Pass in FIRST OR SECOND
-            var endOfSRIndex = _pdfText.IndexOf("END OF FIRST READING ORDINANCES");
-            var _pdftext = _pdfText.Substring(0, endOfSRIndex);
 
             LoadOrdinances();
 
@@ -55,335 +38,236 @@ namespace PdfParser
 
         private void LoadOrdinances(bool singlePage = false)
         {
-            var indexOfResolution = 0;
+            var indexOfItem = 0;
             var counter = 1;
-            var agendaReadingNumber = "FR.";
-            var startOfOrdinance = $"FR.{counter.ToString()}                         ORDINANCE";
-            if (!singlePage)
+            var sectionItemNumber = "FR.";
+            // Get proper spacing
+            var startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         ORDINANCE";
+            var oldStartOfResolution = string.Empty;
+
+            // Get Page #
+            var pageFooterTerm = "City of Miami                                                 Page ";
+            var pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
+            var pageNumber = _.Substring(pageFooterIndex, 2);
+            currentPageNumber = Int32.Parse(pageNumber);
+
+            while (_.Contains(startOfResolution))
             {
-                // Paragraph = Index of title + title length, Paragraph length - next title length
-                // Pass in FIRST OR SECOND
-                while (!_pdfText.Contains("END OF FIRST READING ORDINANCES") && _pdfText.Contains(_resolution))
+                var itemNumber = string.Empty;
+                var motionTo = string.Empty;
+                var result = string.Empty;
+                var movers = new List<string>();
+                var seconders = new List<string>();
+                var ayes = new List<string>();
+                var absent = new List<string>();
+                var enactmentNumber = string.Empty;
+                var itemBodyLength = 0;
+                var itemBody = string.Empty;
+
+                oldStartOfResolution = startOfResolution;
+
+                // Clear everything StartOfResolution
+                _ = _.Remove(0, _.IndexOf(startOfResolution));
+
+                indexOfItem = _.IndexOf(_resolution);
+                // Item # is from title of item plus a certain number of spaces, the length of the 
+                // Item # should be 4 characters
+                var t = _.Substring(indexOfItem, 105);
+                itemNumber = _.Substring(indexOfItem, 105).Replace(_resolutionHeaderSpace, string.Empty).Trim();
+
+                // Check for next item
+                if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
                 {
-                    var ordinanceNumber = string.Empty;
-                    var motionTo = string.Empty;
-                    var result = string.Empty;
-                    var movers = new List<string>();
-                    var seconders = new List<string>();
-                    var ayes = new List<string>();
-                    var absent = new List<string>();
-                    var enactmentNumber = string.Empty;
-                    var resolutionBodyLength = 0;
-                    var resolutionBody = string.Empty;
+                    // Store text in _pdfText;
+                    _pdfText = _;
 
-                    indexOfResolution = _pdfText.IndexOf(_resolution);
-                    ordinanceNumber = _pdfText.Substring(indexOfResolution, 40).Replace(_resoltutionHeaderSpace, string.Empty).Trim();
-                    if (_pdfText.Contains(_enactmentNumber))
-                    {
-                        enactmentNumber = _pdfText.Substring(_pdfText.IndexOf(_enactmentNumber) + _enactmentNumber.Length, 30).Trim();
-                    }
-                    else
-                    {
-                        _splitPage = true;
-                        // Get first half of resolution
-                        resolutionBodyLength = (_pdfText.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _pdfText.IndexOf(_resolution);
-                        resolutionBody = _pdfText.Substring(_pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength).TrimEnd();
+                    // Remove the next item because the votes were getting mistaken for this one.
+                    _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
 
-                        // Next page
-                        _buffer.Clear();
-                        _pageBase = _pages[++_index];
-                        _buffer.Append(_pageBase.ExtractText());
-                        _pdfText = _buffer.ToString();
-
-                        // Get second half of resolution
-                        resolutionBody += _pdfText.Substring(0, _pdfText.IndexOf(_motionTo)).TrimEnd();
-                        resolutionBody = resolutionBody.Replace(_textToRemove, string.Empty).Replace(_textToRemove2, string.Empty).Replace("January 10, 2019", string.Empty).TrimStart();
-
-                        if (_pdfText.Contains(_motionTo))
-                        {
-                            // Continue
-                            motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                            result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                            movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                            seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                            ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                            absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-
-                            var end = _pdfText.IndexOf("\r\n                                                  \r\n                                                   ");
-
-                            // Clear resolution we've just done
-                            _pdfText = _pdfText.Substring(end, _pdfText.Length - end);
-                        }
-                        else
-                        {
-                            // Move on to next page
-                            _buffer.Clear();
-                            _pageBase = _pages[++_index];
-                            _buffer.Append(_pageBase.ExtractText());
-                            _pdfText = _buffer.ToString();
-
-                            // Get Ordinance results/votes
-                            motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                            result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                            movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                            seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                            ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                            absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                        }
-
-                        ReadingOrdinances.Add(new ReadingOrdinance
-                        {
-                            ItemNumber = ordinanceNumber,
-                            EnactmentNumber = enactmentNumber,
-                            Body = resolutionBody,
-                            MotionTo = motionTo,
-                            Result = result,
-                            Movers = movers,
-                            Seconders = seconders,
-                            Ayes = ayes,
-                            Absent = absent
-                        });
-                        continue;
-                    }
-
-                    resolutionBodyLength = _pdfText.IndexOf(_enactmentNumber) - _pdfText.IndexOf(_resolution);
-                    resolutionBody = _pdfText.Substring(_pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength);
-
-                    if (_pdfText.Contains(_motionTo))
-                    {
-                        // Continue
-                        motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                        result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                        movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                        seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                        ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-
-                        //var end = _pdfText.IndexOf("\r\n                                                  \r\n                                                   ");
-
-                        //// Clear resolution we've just done
-                        //_pdfText = _pdfText.Substring(end, _pdfText.Length - end);
-                    }
-                    else
-                    {
-                        // Move on to next page
-                        _buffer.Clear();
-                        _pageBase = _pages[++_index];
-                        _buffer.Append(_pageBase.ExtractText());
-                        _pdfText = _buffer.ToString();
-
-                        // Get Ordinance results/votes
-                        motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                        result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                        movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                        seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                        ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                    }
-
-                    //var endOfResolution = _pdfText.IndexOf(enactmentNumber) + enactmentNumber.Length;
-                    var threeBreakLines = " \r\n                        \r\n                        \r\n";
-                    var endOfResolution = _pdfText.IndexOf(threeBreakLines);
-
-                    if (endOfResolution == 0)
-                    {
-                        //// Clear resolution we've just done
-                        endOfResolution = _pdfText.IndexOf(_ayes);
-                        _pdfText = _pdfText.Substring(endOfResolution, _pdfText.Length - endOfResolution);
-                    }
-                    else
-                    {
-                        // Clear resolution we've just done
-                        _pdfText = _pdfText.Substring(endOfResolution, _pdfText.Length - endOfResolution);
-                    }
-
-                    ReadingOrdinances.Add(new ReadingOrdinance
-                    {
-                        ItemNumber = ordinanceNumber,
-                        EnactmentNumber = enactmentNumber,
-                        Body = resolutionBody,
-                        MotionTo = motionTo,
-                        Result = result,
-                        Movers = movers,
-                        Seconders = seconders,
-                        Ayes = ayes,
-                        Absent = absent
-                    });
                 }
+
+                // Body length should be from startOfResolution to MotionTo: minus certain characters
+                // or it there is a consistent ". " space after the period.
+                //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
+
+                if (_.Contains(_motionTo))
+                {
+                    itemBodyLength = (_.IndexOf(_motionTo) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                }
+                else if (_.Contains(_result))
+                {
+                    itemBodyLength = (_.IndexOf(_result) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                }
+                // Else the whole page is part of the itemBody
+                // Get index of bottom line minus 1
+                // Itembody = startOfResolution to index of bottom line
+                else
+                {
+                    itemBodyLength = (_.IndexOf(pageFooterTerm) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+
+                    //Increment page and continue
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+
+                    // If it contains the next resolution, remove everything from the beginning of 
+                    // the next resolution
+                    // Check for next item
+                    if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
+                    {
+                        // Store text in _pdfText;
+                        _pdfText = _;
+
+                        // Remove the next item because the votes were getting mistaken for this one.
+                        _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
+
+                    }
+
+                    // Clear any misc text
+                    _ = _.Replace(_textToRemove, string.Empty);
+                    _ = _.Replace(_textToRemove2, string.Empty);
+                    _ = _.TrimStart();
+
+                    // If contains motionTo
+                    // Add everything from 0 to start
+                    if (_.Contains(_motionTo))
+                    {
+                        itemBody += " " + _.Substring(0, _.IndexOf(_motionTo));
+                    }
+
+                    // else if contains result
+                    // Add everything from 0 to start 
+                    else if (_.Contains(_result))
+                    {
+                        itemBody = " " + _.Substring(0, _.IndexOf(_result));
+                    }
+
+                    // Continue on to votes
+                }
+
+
+                if (_.Contains(_motionTo))
+                {
+                    // Clear resolution
+                    _ = _.Remove(0, _.IndexOf(_motionTo));
+
+                    // Get vote info
+                    motionTo = _.Substring(_.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
+                    movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 60).Trim().Split(',').ToList());
+
+                    if (_.Contains(_absent))
+                    {
+                        absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                    }
+                }
+                else if (_.Contains(_result))
+                {
+                    result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
+
+                    // Remove result
+                    _ = _.Remove(0, _.IndexOf(_result) + 40);
+                }
+                else
+                {
+                    // Clear resolution
+                    throw new Exception("Find way to clear resolution");
+
+                    // Get vote info
+                    //motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    //result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
+                    //movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    //seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    //ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                    //absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                }
+
+                // Increment counter and check for next
+                counter++;
+                if (counter < 10)
+                {
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         ORDINANCE";
+                }
+                else
+                {
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        ORDINANCE";
+                }
+
+                // Add Item
+                ReadingOrdinances.Add(new ReadingOrdinance
+                {
+                    ItemNumber = itemNumber,
+                    EnactmentNumber = enactmentNumber,
+                    Body = itemBody,
+                    MotionTo = motionTo,
+                    Result = result,
+                    Movers = movers,
+                    Seconders = seconders,
+                    Ayes = ayes,
+                    Absent = absent
+                });
+
+                // Get rest of page that was stored in _pdfText
+                if (!string.IsNullOrWhiteSpace(_pdfText))
+                {
+                    // Get pdfText that was stored earlier
+                    _ = _pdfText;
+
+                    // If contains oldStartResolution, remove it
+                    //if (_.Contains(oldStartOfResolution) && _.Contains(startOfResolution))
+                    //{
+                    //    _ = _.Remove(0, _.IndexOf(startOfResolution));
+                    //}
+
+                    // Correction to the above logic
+                    // Remove everything prior to current resolution (startOfResolution)
+                    _ = _.Remove(0, _.IndexOf(startOfResolution));
+
+                    _pdfText = null;
+                }
+
+                // When the item increments to double digits it looses a space and it no 
+                // longer similar to startOfResolution
+                if (_.Contains(startOfResolution))
+                {
+                    continue;
+                }
+                else if (_.Contains(_end))
+                {
+                    break;
+                }
+                else
+                {
+                    //Increment page and continue
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+                }
+            }
+        }
+
+        private string GetItemHeader(string sectionItemNumber, int counter)
+        {
+            if (counter < 10)
+            {
+                return $"{sectionItemNumber}{counter.ToString()}                         ORDINANCE";
             }
             else
             {
-                // Paragraph = Index of title + title length, Paragraph length - next title length
-                // Pass in FIRST OR SECOND
-                while (_pdfText.Contains(startOfOrdinance))
-                {
-                    var ordinanceNumber = string.Empty;
-                    var motionTo = string.Empty;
-                    var result = string.Empty;
-                    var movers = new List<string>();
-                    var seconders = new List<string>();
-                    var ayes = new List<string>();
-                    var absent = new List<string>();
-                    var enactmentNumber = string.Empty;
-                    var resolutionBodyLength = 0;
-                    var resolutionBody = string.Empty;
-
-                    indexOfResolution = _pdfText.IndexOf(_resolution);
-                    ordinanceNumber = _pdfText.Substring(indexOfResolution, 40).Replace(_resoltutionHeaderSpace, string.Empty).Trim();
-                    if (_pdfText.Contains(_enactmentNumber))
-                    {
-                        enactmentNumber = _pdfText.Substring(_pdfText.IndexOf(_enactmentNumber) + _enactmentNumber.Length, 30).Trim();
-                    }
-                    else
-                    {
-                        // Clear everything before FR.1
-                        agendaReadingNumber = "FR." + counter.ToString();
-                        _pdfText = _pdfText.Remove(0, _pdfText.IndexOf($"{agendaReadingNumber}"));
-
-                        var ordinanceEnd = "\r\n                                                  \r\n                                                   ";
-                        resolutionBodyLength = (_pdfText.IndexOf(ordinanceEnd)) - _pdfText.IndexOf(_resolution);
-                        resolutionBody = _pdfText.Substring(_pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength).TrimEnd();
-
-                        //// Next page
-                        //_buffer.Clear();
-                        //_pageBase = _pages[++_index];
-                        //_buffer.Append(_pageBase.ExtractText());
-                        //_pdfText = _buffer.ToString();
-
-                        // Get second half of resolution
-                        //resolutionBody += _pdfText.Substring(0, _pdfText.IndexOf(_motionTo)).TrimEnd();
-                        //resolutionBody = resolutionBody.Replace(_textToRemove, string.Empty).Replace(_textToRemove2, string.Empty).Replace("January 10, 2019", string.Empty).TrimStart();
-
-                        if (_pdfText.Contains(_motionTo))
-                        {
-                            // Continue
-                            motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                            result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                            movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                            seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                            ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                            absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-
-                            var end = _pdfText.IndexOf(_ayes);
-
-                            // Clear resolution we've just done
-                            _pdfText = _pdfText.Remove(0, end);
-                        }
-                        else
-                        {
-                            // Move on to next page
-                            _buffer.Clear();
-                            _pageBase = _pages[++_index];
-                            _buffer.Append(_pageBase.ExtractText());
-                            _pdfText = _buffer.ToString();
-
-                            // Get Ordinance results/votes
-                            motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                            result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                            movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                            seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                            ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                            absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                        }
-
-                        ReadingOrdinances.Add(new ReadingOrdinance
-                        {
-                            ItemNumber = ordinanceNumber,
-                            EnactmentNumber = enactmentNumber,
-                            Body = resolutionBody,
-                            MotionTo = motionTo,
-                            Result = result,
-                            Movers = movers,
-                            Seconders = seconders,
-                            Ayes = ayes,
-                            Absent = absent
-                        });
-                        counter++;
-                        startOfOrdinance = $"FR.{counter.ToString()}                         ORDINANCE";
-                        continue;
-                    }
-
-                    resolutionBodyLength = _pdfText.IndexOf(_enactmentNumber) - _pdfText.IndexOf(_resolution);
-                    resolutionBody = _pdfText.Substring(_pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength);
-
-                    if (_pdfText.Contains(_motionTo))
-                    {
-                        // Continue
-                        motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                        result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                        movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                        seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                        ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-
-                        //var end = _pdfText.IndexOf("\r\n                                                  \r\n                                                   ");
-
-                        //// Clear resolution we've just done
-                        //_pdfText = _pdfText.Substring(end, _pdfText.Length - end);
-                    }
-                    else
-                    {
-                        // Move on to next page
-                        _buffer.Clear();
-                        _pageBase = _pages[++_index];
-                        _buffer.Append(_pageBase.ExtractText());
-                        _pdfText = _buffer.ToString();
-
-                        // Get Ordinance results/votes
-                        motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                        result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                        movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                        seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                        ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                    }
-
-                    //var endOfResolution = _pdfText.IndexOf(enactmentNumber) + enactmentNumber.Length;
-                    var threeBreakLines = " \r\n                        \r\n                        \r\n";
-                    var endOfResolution = _pdfText.IndexOf(threeBreakLines);
-
-                    if (endOfResolution == 0)
-                    {
-                        //// Clear resolution we've just done
-                        endOfResolution = _pdfText.IndexOf(_ayes);
-                        _pdfText = _pdfText.Substring(endOfResolution, _pdfText.Length - endOfResolution);
-                    }
-                    else
-                    {
-                        // Clear resolution we've just done
-                        _pdfText = _pdfText.Substring(endOfResolution, _pdfText.Length - endOfResolution);
-                    }
-
-                    ReadingOrdinances.Add(new ReadingOrdinance
-                    {
-                        ItemNumber = ordinanceNumber,
-                        EnactmentNumber = enactmentNumber,
-                        Body = resolutionBody,
-                        MotionTo = motionTo,
-                        Result = result,
-                        Movers = movers,
-                        Seconders = seconders,
-                        Ayes = ayes,
-                        Absent = absent
-                    });
-                }
+                return $"{sectionItemNumber}{counter.ToString()}                        ORDINANCE";
             }
         }
     }
 
     public class ReadingOrdinance
     {
-        private string _pdfText { get; set; }
-        private StringBuilder _buffer { get; set; } = new StringBuilder();
-        private PdfPageBase _pageBase { get; set; }
-        private string _resolution => "ORDINANCE";
-        private string ph1 => "PH.1";
-        private string _result => "RESULT:";
-        private string _mover => "MOVER:";
-        private string _seconder => "SECONDER:";
-        private string _ayes => "AYES:";
-        private string _absent => "ABSENT:";
-
         public string ItemNumber { get; set; }
         public string Body { get; set; }
         public string EnactmentNumber { get; set; }

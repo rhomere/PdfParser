@@ -267,17 +267,6 @@ namespace PdfParser
 
     public class SecondReadingOrdinance
     {
-        private string _pdfText { get; set; }
-        private StringBuilder _buffer { get; set; } = new StringBuilder();
-        private PdfPageBase _pageBase { get; set; }
-        private string _resolution => "ORDINANCE";
-        private string ph1 => "PH.1";
-        private string _result => "RESULT:";
-        private string _mover => "MOVER:";
-        private string _seconder => "SECONDER:";
-        private string _ayes => "AYES:";
-        private string _absent => "ABSENT:";
-
         public string ItemNumber { get; set; }
         public string Body { get; set; }
         public string EnactmentNumber { get; set; }
