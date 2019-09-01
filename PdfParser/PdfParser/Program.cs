@@ -59,21 +59,32 @@ namespace PdfParser
                 buffer.Append(pageBase.ExtractText());
                 pdfText = buffer.ToString();
 
-                //if (pdfText == null) return;
-
+                // As of 09/01/2019 there has not been a Mayoral Vetoes section with actual vetoes
+                // However 08/02/2019 there was a separated pdf with description
+                // "Mayor's Office - Item(s) Vetoed by the Mayor"
                 if (pdfText.Contains("MV - MAYORAL VETOES"))
                 {
-                    mayoralVetoresStart = true;
-                }
-
-                if (mayoralVetoresStart && !mayoralVetoresEnd)
-                {
                     miamiMeetingMinutes.MayoralVeotes = GetMayoralVetoes(doc.Pages, i);
-                }
-
-                if (pdfText.Contains("END OF MAYORAL VETOES"))
-                {
                     mayoralVetoresEnd = true;
+
+                    // If text contains next section (Public Hearing) continue
+                    // Otherwise increment page count.
+                    pageBase = doc.Pages[i];
+                    buffer.Append(pageBase.ExtractText());
+                    pdfText = buffer.ToString();
+
+                    if (pdfText.Contains("CA - CONSENT AGENDA"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        i++;
+                        pageBase = doc.Pages[i];
+                        buffer.Append(pageBase.ExtractText());
+                        pdfText = buffer.ToString();
+                    }
                 }
 
                 if (pdfText.Contains("CA - CONSENT AGENDA"))
@@ -104,8 +115,6 @@ namespace PdfParser
                         buffer.Append(pageBase.ExtractText());
                         pdfText = buffer.ToString();
                     }
-                    //i = i--;
-                    //pageCounter = i;
                 }
 
                 if (pdfText.Contains("PH - PUBLIC HEARINGS"))
@@ -343,14 +352,8 @@ namespace PdfParser
                 pageCounter++;
             }
 
-            //foreach (PdfPageBase pageBase in doc.Pages)
-            //{
-            //    buffer.Append(pageBase.ExtractText());
-            //}
-
             doc.Close();
 
-            //var pdfText = buffer.ToString();
             return miamiMeetingMinutes;
         }
 

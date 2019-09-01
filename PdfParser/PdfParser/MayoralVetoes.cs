@@ -9,14 +9,14 @@ namespace PdfParser
 {
     public class MayoralVetoes : Base
     {
-        //private PdfPageCollection _pages;
-        //private int _mayoralVetoPageIndex;
-        //private string _pdfText { get; set; }
-        //private StringBuilder _buffer { get; set; } = new StringBuilder();
-        //private PdfPageBase _pageBase { get; set; }
-
         public bool HasVetoes { get; set; }
-
+        private string _discussionItem = string.Empty;
+        private string _discussionItemHeaderSpace = string.Empty;
+        private string _cityOfMiami = "City of Miami";// Problematic because "City of Miami" may exist in resolution body
+        private string _textToRemove = "Evaluation Warning : The document was created with Spire.PDF for .NET.";
+        private string _textToRemove2 = "City Commission                                          Marked Agenda                                            ";
+        private string _start = "MV - MAYORAL VETOES";
+        private string _end = "END OF MAYORAL VETOES";
 
         public MayoralVetoes(PdfPageCollection pages, int mayoralVetoPageIndex)
         {
@@ -24,14 +24,14 @@ namespace PdfParser
             _index = mayoralVetoPageIndex;
             _pageBase = pages[mayoralVetoPageIndex];
             _buffer.Append(_pageBase.ExtractText());
-            _pdfText = _buffer.ToString();
+            _ = _buffer.ToString();
 
             LoadMayoralVetoes();
         }
 
         private void LoadMayoralVetoes()
         {
-            if (_pdfText.Contains("NO MAYORAL VETOES"))
+            if (_.Contains("NO MAYORAL VETOES"))
             {
                 HasVetoes = false;
             }
