@@ -11,11 +11,13 @@ namespace PdfParser
     public class Reading : Base
     {
         private string _resolution = "ORDINANCE";
-        private string _resoltutionHeaderSpace = "ORDINANCE \r\n";
+        private string _resolutionHeaderSpace = "ORDINANCE                                                        First Reading \r\n";
         private string _enactmentNumber = "ENACTMENT NUMBER:";
         private string _cityOfMiami = "City of Miami";// Problematic because "City of Miami" may exist in resolution body
         private string _textToRemove = "Evaluation Warning : The document was created with Spire.PDF for .NET.";
-        private string _textToRemove2 = "City Commission                                          Marked Agenda                                            ";
+        private string _textToRemove2 = $"City Commission                                          Marked Agenda                                            January 10, 2019";
+        private string _start = "FR - FIRST READING ORDINANCES";
+        private string _end = "END OF FIRST READING ORDINANCES";
         private bool _splitPage { get; set; }
 
         public List<ReadingOrdinance> ReadingOrdinances { get; set; } = new List<ReadingOrdinance>();
