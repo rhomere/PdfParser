@@ -10,11 +10,12 @@ namespace PdfParser
 {
     public class AttorneyClientSession : Base
     {
-        private string _attorneyClientSession = "ATTORNEY-CLIENT SESSION";
-        private string _attorneyClientSessionHeaderSpace = "ATTORNEY-CLIENT SESSION \r\n";
+        private string _resolution = "ATTORNEY-CLIENT SESSION";
+        private string _resolutionHeaderSpace = "ATTORNEY-CLIENT SESSION \r\n";
         private string _cityOfMiami = "City of Miami";// Problematic because "City of Miami" may exist in resolution body
         private string _textToRemove = "Evaluation Warning : The document was created with Spire.PDF for .NET.";
-        private string _textToRemove2 = "City Commission                                          Marked Agenda                                            ";
+        private string _textToRemove2 = $"City Commission                                          Marked Agenda                                            January 10, 2019";
+        private string _pageFooterTerm = "City of Miami                                                 Page ";
         private string _start = "AC - ATTORNEY-CLIENT SESSION";
         private string _end = "END OF ATTORNEY-CLIENT SESSION";
 
@@ -28,21 +29,6 @@ namespace PdfParser
             _buffer.Append(_pageBase.ExtractText());
             _ = _buffer.ToString();
 
-            // If Section is only one page
-            if (_.Contains(_start) && _.Contains(_end))
-            {
-                LoadAttorneyClientSessionItems(singlePage: true);
-            }
-
-            while (!_.Contains(_end))
-            {
-                LoadAttorneyClientSessionItems();
-            }
-
-            // I think this removes the end of the section from the text
-            var endOfSRIndex = _.IndexOf(_end);
-            var _pdftext = _.Substring(0, endOfSRIndex);
-
             LoadAttorneyClientSessionItems();
 
             outIndex = _index;
@@ -52,141 +38,247 @@ namespace PdfParser
         {
             var indexOfItem = 0;
             var counter = 1;
-            var agendaReadingNumber = "AC.";
-            var startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
+            var sectionItemNumber = "AC.";
+            var startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
             var oldStartOfResolution = string.Empty;
+            var currentPageNumber = 0;
+            var oldPageNumber = 0;
 
+            while (_.Contains(startOfResolution) || (currentPageNumber > oldPageNumber))
+            {
+                var itemNumber = string.Empty;
+                var motionTo = string.Empty;
+                var result = string.Empty;
+                var movers = new List<string>();
+                var seconders = new List<string>();
+                var ayes = new List<string>();
+                var absent = new List<string>();
+                var enactmentNumber = string.Empty;
+                var itemBodyLength = 0;
+                var itemBody = string.Empty;
+
+                if (currentPageNumber > oldPageNumber)
+                {
+                    startOfResolution = oldStartOfResolution;
+                }
+                
+                // Get Page #
+                currentPageNumber = GetPageNumber();
+
+                oldStartOfResolution = startOfResolution;
+                oldPageNumber = currentPageNumber;
+
+                // Clear everything up to StartOfResolution
+                _ = _.Remove(0, _.IndexOf(startOfResolution));
+
+                indexOfItem = _.IndexOf(_resolution);
+                // Item # is from title of item plus a certain number of spaces, the length of the 
+                // Item # should be 4 characters
+                itemNumber = _.Substring(indexOfItem, 105).Replace(_resolutionHeaderSpace, string.Empty).Trim();
+
+                // Check for next item
+                if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
+                {
+                    // Store text in _pdfText;
+                    _pdfText = _;
+
+                    // Remove the next item because the votes were getting mistaken for this one.
+                    _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
+
+                }
+
+                // Body length should be from startOfResolution to MotionTo: minus certain characters
+                // or it there is a consistent ". " space after the period.
+                //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
+
+                if (_.Contains(_motionTo))
+                {
+                    itemBodyLength = (_.IndexOf(_motionTo) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                }
+                else if (_.Contains(_result))
+                {
+                    itemBodyLength = (_.IndexOf(_result) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                }
+                // Else the whole page is part of the itemBody
+                // Get index of bottom line minus 1
+                // Itembody = startOfResolution to index of bottom line
+                else
+                {
+                    itemBodyLength = (_.IndexOf(_pageFooterTerm) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+
+                    //Increment page and continue
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+
+                    // If it contains the next resolution, remove everything from the beginning of 
+                    // the next resolution
+                    // Check for next item
+                    if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
+                    {
+                        // Store text in _pdfText;
+                        _pdfText = _;
+
+                        // Remove the next item because the votes were getting mistaken for this one.
+                        _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
+
+                    }
+
+                    // Clear any misc text
+                    _ = _.Replace(_textToRemove, string.Empty);
+                    _ = _.Replace(_textToRemove2, string.Empty);
+                    _ = _.TrimStart();
+
+                    // If contains motionTo
+                    // Add everything from 0 to start
+                    if (_.Contains(_motionTo))
+                    {
+                        itemBody += " " + _.Substring(0, _.IndexOf(_motionTo));
+                    }
+
+                    // else if contains result
+                    // Add everything from 0 to start 
+                    else if (_.Contains(_result))
+                    {
+                        itemBody = " " + _.Substring(0, _.IndexOf(_result));
+                    }
+
+                    // Continue on to votes
+                }
+
+
+                if (_.Contains(_motionTo))
+                {
+                    // Clear resolution
+                    _ = _.Remove(0, _.IndexOf(_motionTo));
+
+                    // Get vote info
+                    motionTo = _.Substring(_.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
+                    movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 60).Trim().Split(',').ToList());
+
+                    if (_.Contains(_absent))
+                    {
+                        absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                    }
+                }
+                else if (_.Contains(_result))
+                {
+                    result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
+
+                    // Remove result
+                    _ = _.Remove(0, _.IndexOf(_result) + 40);
+                }
+                else
+                {
+                    // Clear resolution
+                    throw new Exception("Find way to clear resolution");
+
+                    // Get vote info
+                    //motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    //result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
+                    //movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    //seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    //ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                    //absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                }
+
+                // Increment counter and check for next
+                counter++;
+                if (counter < 10)
+                {
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
+                }
+                else
+                {
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        ATTORNEY-CLIENT SESSION";
+                }
+
+                // Add Item
+                AttorneyClientSessionItems.Add(new AttorneyClientSessionItem
+                {
+                    ItemNumber = itemNumber,
+                    EnactmentNumber = enactmentNumber,
+                    Body = itemBody,
+                    MotionTo = motionTo,
+                    Result = result,
+                    Movers = movers,
+                    Seconders = seconders,
+                    Ayes = ayes,
+                    Absent = absent
+                });
+
+                // Get rest of page that was stored in _pdfText
+                if (!string.IsNullOrWhiteSpace(_pdfText))
+                {
+                    // Get pdfText that was stored earlier
+                    _ = _pdfText;
+
+                    // If contains oldStartResolution, remove it
+                    //if (_.Contains(oldStartOfResolution) && _.Contains(startOfResolution))
+                    //{
+                    //    _ = _.Remove(0, _.IndexOf(startOfResolution));
+                    //}
+
+                    // Correction to the above logic
+                    // Remove everything prior to current resolution (startOfResolution)
+                    _ = _.Remove(0, _.IndexOf(startOfResolution));
+
+                    _pdfText = null;
+                }
+
+                // When the item increments to double digits it looses a space and it no 
+                // longer similar to startOfResolution
+                if (_.Contains(startOfResolution))
+                {
+                    continue;
+                }
+                else if (_.Contains(_end))
+                {
+                    break;
+                }
+                else
+                {
+                    //Increment page and continue
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+                    currentPageNumber = GetPageNumber();
+                }
+            }
+        }
+
+        private int GetPageNumber()
+        {
             // Get Page #
             var pageFooterTerm = "City of Miami                                                 Page ";
             var pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
             var pageNumber = _.Substring(pageFooterIndex, 2);
-            currentPageNumber = Int32.Parse(pageNumber);
+            return Int32.Parse(pageNumber);
+        }
 
-            if (!singlePage)
+        private string GetItemHeader(string sectionItemNumber, int counter)
+        {
+            if (counter < 10)
             {
-                // Paragraph = Index of title + title length, Paragraph length - next title length
-
-                // While text contains item
-                while (_.Contains(startOfResolution))
-                {
-                    // Declare variables
-                    var itemNumber = string.Empty;
-                    var motionTo = string.Empty;
-                    var result = string.Empty;
-                    var movers = new List<string>();
-                    var seconders = new List<string>();
-                    var ayes = new List<string>();
-                    var absent = new List<string>();
-                    var enactmentNumber = string.Empty;
-                    var itemBodyLength = 0;
-                    var itemBody = string.Empty;
-
-                    oldStartOfResolution = startOfResolution;
-
-                    indexOfItem = _.IndexOf(_attorneyClientSession);
-                    // Item # is from title of item plus a certain number of spaces, the length of the 
-                    // Item # should be 4 characters
-                    itemNumber = _attorneyClientSession = _.Substring(indexOfItem, 40).Replace(_attorneyClientSessionHeaderSpace, string.Empty).Trim();
-
-                    // Body length should be from startOfResolution to MotionTo: minus certain characters
-                    // or it there is a consistent ". " space after the period.
-                    //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(_motionTo) - 1));
-
-                    if (_.Contains(_motionTo))
-                    {
-                        // Clear resolution
-                        _ = _.Remove(0, _.IndexOf(_motionTo));
-
-                        // Get vote info
-                        motionTo = _.Substring(_.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                        result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
-                        movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
-                        seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                        ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                    }
-                    else
-                    {
-                        // Clear resolution
-                        throw new Exception("Find way to clear resolution");
-
-                        // Get vote info
-                        //motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                        //result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                        //movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                        //seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                        //ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        //absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                    }
-
-                    // Add Item
-                    AttorneyClientSessionItems.Add(new AttorneyClientSessionItem
-                    {
-                        ItemNumber = itemNumber,
-                        EnactmentNumber = enactmentNumber,
-                        Body = itemBody,
-                        MotionTo = motionTo,
-                        Result = result,
-                        Movers = movers,
-                        Seconders = seconders,
-                        Ayes = ayes,
-                        Absent = absent
-                    });
-
-                    // Remove votes and check for end of section and break
-                    _ = _.Remove(0, _.IndexOf(_absent) + 40);
-
-                    // Maybe be pre-mature to break here, what if there is another Item?
-                    if (_.Contains(_end))
-                    {
-                        break;
-                    }
-
-
-                    counter++;
-                    startOfResolution = $"{agendaReadingNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
-
-                    if (_.Contains(startOfResolution))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        // Next page
-                        _buffer.Clear();
-                        _pageBase = _pages[++_index];
-                        _buffer.Append(_pageBase.ExtractText());
-                        _ = _buffer.ToString();
-
-                        // Get Page #
-                        pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
-                        pageNumber = _.Substring(pageFooterIndex, 2);
-                        newPageNumber = Int32.Parse(pageNumber);
-
-                        // If startOfItem doesn't match && page # is different && end of section doesn't exist
-                        // Possible intential duplicate item.
-                        if (newPageNumber > currentPageNumber && _.Contains(oldStartOfResolution))
-                        {
-                            LoadAttorneyClientSessionItems(false);
-                        }
-                    }
-                }  
+                return $"{sectionItemNumber}{counter.ToString()}                         ATTORNEY-CLIENT SESSION";
+            }
+            else
+            {
+                return $"{sectionItemNumber}{counter.ToString()}                        ATTORNEY-CLIENT SESSION";
             }
         }
     }
 
     public class AttorneyClientSessionItem
     {
-        private string _pdfText { get; set; }
-        private StringBuilder _buffer { get; set; } = new StringBuilder();
-        private PdfPageBase _pageBase { get; set; }
-        private string _result => "RESULT:";
-        private string _mover => "MOVER:";
-        private string _seconder => "SECONDER:";
-        private string _ayes => "AYES:";
-        private string _absent => "ABSENT:";
-
         public string ItemNumber { get; set; }
         public string Body { get; set; }
         public string EnactmentNumber { get; set; }
