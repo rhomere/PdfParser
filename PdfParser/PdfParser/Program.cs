@@ -87,12 +87,8 @@ namespace PdfParser
                     }
                 }
 
+                // CONSENT AGENDA
                 if (pdfText.Contains("CA - CONSENT AGENDA"))
-                {
-                    consentAgendaStart = true;
-                }
-
-                if (consentAgendaStart && !miamiMeetingMinutes.ConsentAgenda.ConsentAgendComplete)
                 {
                     miamiMeetingMinutes.ConsentAgenda = GetConsentAgendaResult(doc.Pages, i, out i);
                     consentAgendaEnd = true;
@@ -117,12 +113,8 @@ namespace PdfParser
                     }
                 }
 
+                // PUBLIC HEARINGS
                 if (pdfText.Contains("PH - PUBLIC HEARINGS"))
-                {
-                    publicHearingStart = true;
-                }
-
-                if (publicHearingStart && !publicHearingEnd)
                 {
                     miamiMeetingMinutes.PublicHearings = GetPublicHearing(doc.Pages, i, out i);
                     publicHearingEnd = true;
@@ -145,7 +137,7 @@ namespace PdfParser
                     }
                 }
 
-
+                // SECOND READING ORDINANCES
                 if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
                 {
                     miamiMeetingMinutes.SecondReadings = GetSecondReading(doc.Pages, i, out i);
@@ -169,6 +161,7 @@ namespace PdfParser
                     }
                 }
 
+                // FIRST READING ORDINANCES
                 if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
                 {
                     miamiMeetingMinutes.FirstReadings = GetFirstReading(doc.Pages, i, out i);
@@ -191,6 +184,7 @@ namespace PdfParser
                     }
                 }
 
+                // RESOLUTIONS
                 if (pdfText.Contains("RE - RESOLUTIONS"))
                 {
                     miamiMeetingMinutes.Resolutions = GetResolutions(doc.Pages, i, out i);
@@ -213,6 +207,7 @@ namespace PdfParser
                     }
                 }
 
+                // ATTORNEY-CLIENT SESSION
                 if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
                 {
                     miamiMeetingMinutes.AttorneyClientSession = GetAttorneyClientSession(doc.Pages, i, out i);
@@ -235,6 +230,7 @@ namespace PdfParser
                     }
                 }
 
+                //BOARDS AND COMMITTEES
                 if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
                 {
                     miamiMeetingMinutes.BoardsAndCommittee = GetMiamiMeetingMinutes(doc.Pages, i, out i);
@@ -257,6 +253,7 @@ namespace PdfParser
                     }
                 }
 
+                // DISCUSSION ITEMS
                 if (pdfText.Contains("DI - DISCUSSION ITEMS"))
                 {
                     miamiMeetingMinutes.DiscussionItemSection = GetDiscussionItems(doc.Pages, i, out i);
@@ -279,6 +276,7 @@ namespace PdfParser
                     }
                 }
 
+                // DISTRICT 3
                 if (pdfText.Contains("D3 - DISTRICT 3"))
                 {
                     miamiMeetingMinutes.District3Section = GetDisctrict3Section(doc.Pages, i, out i);
@@ -301,6 +299,7 @@ namespace PdfParser
                     }
                 }
 
+                // FUTURE LEGISLATION
                 if (pdfText.Contains("FL - FUTURE LEGISLATION"))
                 {
                     miamiMeetingMinutes.FutureLegislationSection = GetFutureLegislation(doc.Pages, i, out i);
