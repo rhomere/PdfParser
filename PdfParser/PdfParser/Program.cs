@@ -42,13 +42,9 @@ namespace PdfParser
             StringBuilder buffer = new StringBuilder();
 
             var pageCounter = 1;
-            var mayoralVetoresStart = false;
             var mayoralVetoresEnd = false;
-            var consentAgendaStart = false;
             var consentAgendaEnd = false;
-            var publicHearingStart = false;
             var publicHearingEnd = false;
-            var secondReadingStart = false;
             var secondReadingEnd = false;
 
             for (int i = 0; i < doc.Pages.Count; i++)
