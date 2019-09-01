@@ -31,23 +31,12 @@ namespace PdfParser
             _buffer.Append(_pageBase.ExtractText());
             _ = _buffer.ToString();
 
-            // If Section is only one page
-            if (_.Contains(_start) && _.Contains(_end))
-            {
-                LoadBoardAndCommitteeItems(singlePage: true);
-            }
-
-            while (!_.Contains(_end))
-            {
-                LoadBoardAndCommitteeItems();
-            }
-
             LoadBoardAndCommitteeItems();
 
             outIndex = _index;
         }
 
-        private void LoadBoardAndCommitteeItems(bool singlePage = false)
+        private void LoadBoardAndCommitteeItems()
         {
             var indexOfItem = 0;
             var counter = 1;
@@ -62,124 +51,217 @@ namespace PdfParser
             var pageNumber = _.Substring(pageFooterIndex, 2);
             currentPageNumber = Int32.Parse(pageNumber);
 
-            if (!singlePage)
-            {
                 // While text contains item
-                while (_.Contains(startOfResolution))
+            while (_.Contains(startOfResolution))
+            {
+                // Declare variables
+                var motionTo = string.Empty;
+                var result = string.Empty;
+                var movers = new List<string>();
+                var seconders = new List<string>();
+                var ayes = new List<string>();
+                var absent = new List<string>();
+                var enactmentNumber = string.Empty;
+                var itemNumber = string.Empty;
+                var itemBodyLength = 0;
+                var itemBody = string.Empty;
+
+                oldStartOfResolution = startOfResolution;
+
+                // Remove everything before start of resolution
+                _ = _.Remove(0, _.IndexOf(startOfResolution));
+
+                indexOfItem = _.IndexOf(_resolution);
+                // Item # is from title of item plus a certain number of spaces, the length of the 
+                // Item # should be 4 characters
+                itemNumber = _.Substring(indexOfItem, 40).Replace(_resoltutionHeaderSpace, string.Empty).Trim();
+
+                // Check for next item
+                if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
                 {
-                    // Declare variables
-                    var motionTo = string.Empty;
-                    var result = string.Empty;
-                    var movers = new List<string>();
-                    var seconders = new List<string>();
-                    var ayes = new List<string>();
-                    var absent = new List<string>();
-                    var enactmentNumber = string.Empty;
-                    var itemNumber = string.Empty;
-                    var itemBodyLength = 0;
-                    var itemBody = string.Empty;
+                    // Store text in _pdfText;
+                    _pdfText = _;
 
-                    oldStartOfResolution = startOfResolution;
+                    // Remove the next item because the votes were getting mistaken for this one.
+                    _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
 
-                    // Remove everything before start of resolution
-                    _ = _.Remove(0, _.IndexOf(startOfResolution));
+                }
 
-                    indexOfItem = _.IndexOf(_resolution);
-                    // Item # is from title of item plus a certain number of spaces, the length of the 
-                    // Item # should be 4 characters
-                    itemNumber = _.Substring(indexOfItem, 40).Replace(_resoltutionHeaderSpace, string.Empty).Trim();
+                // Body length should be from startOfResolution to MotionTo: minus certain characters
+                // or it there is a consistent ". " space after the period.
+                //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
 
-                    // Check for next item
-                    if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
+                try
+                {
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(_appointees) - 1));
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf("APPOINTEE") - 1));
+                }
+
+                var appointeeAndNominators = new List<(string, string)>();
+
+                // Appointees
+                var t = _.IndexOf("NOMINATED BY: \r\n") + 18;
+                _ = _.Remove(0, t);
+                _ = _.Remove(0, _.IndexOf("\r\n") + 4);
+                _ = _.TrimStart();
+
+                while (CanParseAppointee(_))
+                {
+                    var line = _.Substring(0, _.IndexOf("\r\n") + 4);
+
+                    // Loop through this process to get appointee and nominators
+                    var appointee = line.Substring(0, line.IndexOf("  "));
+
+                    // If appointee is any of the officials
+                    // set appointee to null
+                    if (IsAppointeeAnCityOfficial(appointee))
                     {
-                        // Store text in _pdfText;
-                        _pdfText = _;
-
-                        // Remove the next item because the votes were getting mistaken for this one.
-                        _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
-
+                        appointee = string.Empty;
                     }
 
-                    // Body length should be from startOfResolution to MotionTo: minus certain characters
-                    // or it there is a consistent ". " space after the period.
-                    //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
-                    try
+                    if (!string.IsNullOrEmpty(appointee))
                     {
-                        itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf(_appointees) - 1));
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        itemBody = _.Substring(_.IndexOf(startOfResolution), (_.IndexOf("APPOINTEE") - 1));
+                        line = line.Replace(appointee, string.Empty);
                     }
 
-                    var appointeeAndNominators = new List<(string, string)>();
+                    line = line.TrimStart();
+                    var nominator = line.Substring(0, line.IndexOf("\r\n"));
+                    line = line.Replace(nominator, string.Empty);
 
-                    // Appointees
-                    var t = _.IndexOf("NOMINATED BY: \r\n") + 18;
-                    _ = _.Remove(0, t);
+                    // Remove everything to the first breakLine (the appointee line we just processed)
                     _ = _.Remove(0, _.IndexOf("\r\n") + 4);
+
+                    // If one breakLine to next official do current logic
+                    if (breakLineCount(_) == 1)
+                    {
+                        var secondLine = _.Substring(0, _.IndexOf("\r\n"));
+                        secondLine = secondLine.TrimStart().TrimEnd();
+
+                        if (!string.IsNullOrEmpty(secondLine))
+                        {
+                            appointee = secondLine;
+                        }
+                    }
+                    else
+                    {
+                        // Get text from next two breakLines
+                        var line1 = _.Substring(0, _.IndexOf("\r\n"));
+                        line1 = line1.Trim();
+
+                        var line2 = _.Remove(0, _.IndexOf("\r\n") + 4);
+                        line2 = line2.Substring(0, line2.IndexOf("\r\n"));
+                        line2 = line2.Trim();
+
+                        appointee = line1 + " " + line2;
+
+                        _ = _.Remove(0, _.IndexOf("\r\n") + 4);
+                    }
+
+                    // Remove double space in between appointees
+                    _ = _.Remove(0, _.IndexOf("\r\n") + 4);
+
                     _ = _.TrimStart();
 
-                    while (CanParseAppointee(_))
+                    appointeeAndNominators.Add((appointee, nominator));
+                }
+
+                Votes:
+                if (_.Contains(_motionTo))
+                {
+                    // Clear resolution
+                    _ = _.Remove(0, _.IndexOf(_motionTo));
+
+                    // Get vote info
+                    motionTo = _.Substring(_.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
+                    movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                    if (_.Contains(_absent))
                     {
-                        var line = _.Substring(0, _.IndexOf("\r\n") + 4);
+                        absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                    }
+                }
+                else if (_.Contains(_result))
+                {
+                    result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
 
-                        // Loop through this process to get appointee and nominators
-                        var appointee = line.Substring(0, line.IndexOf("  "));
+                    // Remove result
+                    _ = _.Remove(0, _.IndexOf(_result) + 40);
+                }
+                else
+                {
+                    // Should rarely go in here, when the votes get cut off the page
 
-                        // If appointee is any of the officials
-                        // set appointee to null
-                        if (IsAppointeeAnCityOfficial(appointee))
-                        {
-                            appointee = string.Empty;
-                        }
+                    // Next page
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
 
-                        if (!string.IsNullOrEmpty(appointee))
-                        {
-                            line = line.Replace(appointee, string.Empty);
-                        }
-
-                        line = line.TrimStart();
-                        var nominator = line.Substring(0, line.IndexOf("\r\n"));
-                        line = line.Replace(nominator, string.Empty);
-
-                        // Remove everything to the first breakLine (the appointee line we just processed)
-                        _ = _.Remove(0, _.IndexOf("\r\n") + 4);
-
-                        // If one breakLine to next official do current logic
-                        if (breakLineCount(_) == 1)
-                        {
-                            var secondLine = _.Substring(0, _.IndexOf("\r\n"));
-                            secondLine = secondLine.TrimStart().TrimEnd();
-
-                            if (!string.IsNullOrEmpty(secondLine))
-                            {
-                                appointee = secondLine;
-                            }
-                        }
-                        else
-                        {
-                            // Get text from next two breakLines
-                            var line1 = _.Substring(0, _.IndexOf("\r\n"));
-                            line1 = line1.Trim();
-
-                            var line2 = _.Remove(0, _.IndexOf("\r\n") + 4);
-                            line2 = line2.Substring(0, line2.IndexOf("\r\n"));
-                            line2 = line2.Trim();
-
-                            appointee = line1 + " " + line2;
-
-                            _ = _.Remove(0, _.IndexOf("\r\n") + 4);
-                        }
-
-                        // Remove double space in between appointees
-                        _ = _.Remove(0, _.IndexOf("\r\n") + 4);
-
-                        _ = _.TrimStart();
-
-                        appointeeAndNominators.Add((appointee, nominator));
+                    // Get index of next resolution
+                    counter++;
+                    if (counter < 10)
+                    {
+                        startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
+                    }
+                    else
+                    {
+                        startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
                     }
 
+                    //Store text
+                    _pdfText = _; 
+
+                    if (_.Contains(startOfResolution))
+                    {
+                        //Get everything prior to next resolution, i.e. the votes
+                        _ = _.Substring(0, _.IndexOf(startOfResolution));
+
+                        // Remove misc text
+                        _ = _.Replace(_textToRemove, string.Empty);
+                        goto Votes;
+                    }
+
+                }
+
+                // Increment counter and check for next
+                counter++;
+                if (counter < 10)
+                {
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
+                }
+                else
+                {
+                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
+                }
+
+                // If result is empty, go to next page to get votes
+                if (result == string.Empty)
+                {
+                    // Next page
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+
+                    _pdfText = _;
+
+                    // Remove everthing from start of next resolution and on
+                    if (_.Contains(startOfResolution))
+                    {
+                        _ = _.Substring(0, _.IndexOf(startOfResolution));
+                    }
+                    // Otherwise remove everything from end of section and on
+                    else if (_.Contains(_end))
+                    {
+                        _ = _.Substring(0, _.IndexOf(_end));
+                    }
+
+                    // Get votes
                     if (_.Contains(_motionTo))
                     {
                         // Clear resolution
@@ -200,122 +282,65 @@ namespace PdfParser
                         // Remove result
                         _ = _.Remove(0, _.IndexOf(_result) + 40);
                     }
-                    
+                }
 
-                    // Increment counter and check for next
-                    counter++;
-                    if (counter < 10)
+                // Add Item
+                BoardsAndCommitteeItems.Add(new BoardsAndCommitteeItem
+                {
+                    Body = itemBody,
+                    ItemNumber = itemNumber,
+                    MotionTo = motionTo,
+                    Result = result,
+                    Movers = movers,
+                    Seconders = seconders,
+                    Ayes = ayes,
+                    Absent = absent,
+                    AppointeesAndNominators = appointeeAndNominators
+                });
+
+                if (!string.IsNullOrWhiteSpace(_pdfText))
+                {
+                    // Get pdfText that was stored earlier
+                    _ = _pdfText;
+
+                    // If contains oldStartResolution, remove it
+                    if (_.Contains(oldStartOfResolution) && _.Contains(startOfResolution))
                     {
-                        startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
-                    }
-                    else
-                    {
-                        startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
-                    }
-
-                    // If result is empty, go to next page to get votes
-                    if (result == string.Empty)
-                    {
-                        // Next page
-                        _buffer.Clear();
-                        _pageBase = _pages[++_index];
-                        _buffer.Append(_pageBase.ExtractText());
-                        _ = _buffer.ToString();
-
-                        _pdfText = _;
-
-                        // Remove everthing from start of next resolution and on
-                        if (_.Contains(startOfResolution))
-                        {
-                            _ = _.Substring(0, _.IndexOf(startOfResolution));
-                        }
-                        // Otherwise remove everything from end of section and on
-                        else if (_.Contains(_end))
-                        {
-                            _ = _.Substring(0, _.IndexOf(_end));
-                        }
-
-                        // Get votes
-                        if (_.Contains(_motionTo))
-                        {
-                            // Clear resolution
-                            _ = _.Remove(0, _.IndexOf(_motionTo));
-
-                            // Get vote info
-                            motionTo = _.Substring(_.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                            result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
-                            movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
-                            seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                            ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                            absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
-                        }
-                        else if (_.Contains(_result))
-                        {
-                            result = _.Substring(_.IndexOf(_result) + _result.Length, 40).Trim();
-
-                            // Remove result
-                            _ = _.Remove(0, _.IndexOf(_result) + 40);
-                        }
+                        _ = _.Remove(0, _.IndexOf(startOfResolution));
                     }
 
-                    // Add Item
-                    BoardsAndCommitteeItems.Add(new BoardsAndCommitteeItem
+                    _pdfText = null;
+                }
+
+
+                // When the item increments to double digits it looses a space and it no 
+                // longer similar to startOfResolution
+                if (_.Contains(startOfResolution))
+                {
+                    continue;
+                }
+                else if (_.Contains(_end))
+                {
+                    break;
+                }
+                else
+                {
+                    // Next page
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+
+                    // Get Page #
+                    pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
+                    pageNumber = _.Substring(pageFooterIndex, 2);
+                    newPageNumber = Int32.Parse(pageNumber);
+
+                    // If startOfItem doesn't match && page # is different && end of section doesn't exist
+                    // Possible intential duplicate item.
+                    if (newPageNumber > currentPageNumber && _.Contains(oldStartOfResolution))
                     {
-                        Body = itemBody,
-                        ItemNumber = itemNumber,
-                        MotionTo = motionTo,
-                        Result = result,
-                        Movers = movers,
-                        Seconders = seconders,
-                        Ayes = ayes,
-                        Absent = absent,
-                        AppointeesAndNominators = appointeeAndNominators
-                    });
-
-                    if (!string.IsNullOrWhiteSpace(_pdfText))
-                    {
-                        // Get pdfText that was stored earlier
-                        _ = _pdfText;
-
-                        // If contains oldStartResolution, remove it
-                        if (_.Contains(oldStartOfResolution) && _.Contains(startOfResolution))
-                        {
-                            _ = _.Remove(0, _.IndexOf(startOfResolution));
-                        }
-
-                        _pdfText = null;
-                    }
-
-
-                    // When the item increments to double digits it looses a space and it no 
-                    // longer similar to startOfResolution
-                    if (_.Contains(startOfResolution))
-                    {
-                        continue;
-                    }
-                    else if (_.Contains(_end))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        // Next page
-                        _buffer.Clear();
-                        _pageBase = _pages[++_index];
-                        _buffer.Append(_pageBase.ExtractText());
-                        _ = _buffer.ToString();
-
-                        // Get Page #
-                        pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
-                        pageNumber = _.Substring(pageFooterIndex, 2);
-                        newPageNumber = Int32.Parse(pageNumber);
-
-                        // If startOfItem doesn't match && page # is different && end of section doesn't exist
-                        // Possible intential duplicate item.
-                        if (newPageNumber > currentPageNumber && _.Contains(oldStartOfResolution))
-                        {
-                            LoadBoardAndCommitteeItems(false);
-                        }
+                        LoadBoardAndCommitteeItems();
                     }
                 }
             }
