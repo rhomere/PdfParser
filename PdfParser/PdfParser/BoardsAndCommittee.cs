@@ -20,6 +20,7 @@ namespace PdfParser
         private string _appointees = "APPOINTEES:";
         private string _appointee = "APPOINTEE:";
         private string _nominatedBy = "NOMINATED BY:";
+        private bool _splitPage { get; set; }
 
         public List<BoardsAndCommitteeItem> BoardsAndCommitteeItems { get; set; } = new List<BoardsAndCommitteeItem>();
 
@@ -51,7 +52,7 @@ namespace PdfParser
             var pageNumber = _.Substring(pageFooterIndex, 2);
             currentPageNumber = Int32.Parse(pageNumber);
 
-                // While text contains item
+            // While text contains item
             while (_.Contains(startOfResolution))
             {
                 // Declare variables
@@ -168,7 +169,6 @@ namespace PdfParser
                     appointeeAndNominators.Add((appointee, nominator));
                 }
 
-                Votes:
                 if (_.Contains(_motionTo))
                 {
                     // Clear resolution
@@ -194,38 +194,10 @@ namespace PdfParser
                 }
                 else
                 {
+                    // Use splitPage to avoid double incrementing startOfResolution
+                    _splitPage = true;
+
                     // Should rarely go in here, when the votes get cut off the page
-
-                    // Next page
-                    _buffer.Clear();
-                    _pageBase = _pages[++_index];
-                    _buffer.Append(_pageBase.ExtractText());
-                    _ = _buffer.ToString();
-
-                    // Get index of next resolution
-                    counter++;
-                    if (counter < 10)
-                    {
-                        startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
-                    }
-                    else
-                    {
-                        startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
-                    }
-
-                    //Store text
-                    _pdfText = _; 
-
-                    if (_.Contains(startOfResolution))
-                    {
-                        //Get everything prior to next resolution, i.e. the votes
-                        _ = _.Substring(0, _.IndexOf(startOfResolution));
-
-                        // Remove misc text
-                        _ = _.Replace(_textToRemove, string.Empty);
-                        goto Votes;
-                    }
-
                 }
 
                 // Increment counter and check for next
@@ -239,8 +211,9 @@ namespace PdfParser
                     startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
                 }
 
+
                 // If result is empty, go to next page to get votes
-                if (result == string.Empty)
+                if (result == string.Empty || _splitPage)
                 {
                     // Next page
                     _buffer.Clear();
@@ -273,7 +246,10 @@ namespace PdfParser
                         movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 50).Trim());
                         seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 50).Trim());
                         ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                        absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                        if (_.Contains(_absent))
+                        {
+                            absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                        }
                     }
                     else if (_.Contains(_result))
                     {
@@ -297,6 +273,11 @@ namespace PdfParser
                     Absent = absent,
                     AppointeesAndNominators = appointeeAndNominators
                 });
+
+                if (_splitPage)
+                {
+                    _splitPage = false;
+                }
 
                 if (!string.IsNullOrWhiteSpace(_pdfText))
                 {
