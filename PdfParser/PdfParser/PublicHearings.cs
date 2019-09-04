@@ -39,17 +39,21 @@ namespace PdfParser
 
         private void LoadResolutions(bool singlePage = false)
         {
+            #region Initialize local variables
             var indexOfItem = 0;
             var counter = 1;
             var sectionItemNumber = "PH.";
             var startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
             var oldStartOfResolution = string.Empty;
+            #endregion
 
+            #region Get Page #
             // Get Page #
             var pageFooterTerm = "City of Miami                                                 Page ";
             var pageFooterIndex = _.IndexOf(pageFooterTerm) + pageFooterTerm.Length;
             var pageNumber = _.Substring(pageFooterIndex, 2);
             currentPageNumber = Int32.Parse(pageNumber);
+            #endregion
 
             // While text contains item
             while (_.Contains(startOfResolution))
@@ -73,11 +77,14 @@ namespace PdfParser
                 // Clear everything StartOfResolution
                 _ = _.Remove(0, _.IndexOf(startOfResolution));
 
+                #region Get item Number
                 indexOfItem = _.IndexOf(_resolution);
                 // Item # is from title of item plus a certain number of spaces, the length of the 
                 // Item # should be 4 characters
                 itemNumber = _.Substring(indexOfItem, 40).Replace(_resolutionHeaderSpace, string.Empty).Trim();
+                #endregion
 
+                #region Remove Any Other Items, to avoid any confusion of votes
                 // Check for next item
                 if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
                 {
@@ -88,6 +95,7 @@ namespace PdfParser
                     _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
 
                 }
+                #endregion
 
                 #region Get Item Body
                 // Body length should be from startOfResolution to MotionTo: minus certain characters
