@@ -14,7 +14,7 @@ namespace PdfParser
         private string _discussionItemHeaderSpace = string.Empty;
         private string _cityOfMiami = "City of Miami";// Problematic because "City of Miami" may exist in resolution body
         private string _textToRemove = "Evaluation Warning : The document was created with Spire.PDF for .NET.";
-        private string _textToRemove2 = "City Commission                                          Marked Agenda                                            ";
+        private string _textToRemove2 = $"City Commission                                          Marked Agenda                                            January 10, 2019";
         private string _start = "MV - MAYORAL VETOES";
         private string _end = "END OF MAYORAL VETOES";
 
