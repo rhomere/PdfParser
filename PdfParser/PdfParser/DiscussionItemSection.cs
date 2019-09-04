@@ -99,7 +99,54 @@ namespace PdfParser
                     itemBodyLength = (_.IndexOf(_result) - 1) - _.IndexOf(startOfResolution);
                     itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength);
                 }
-                
+                // Else the whole page is part of the itemBody
+                // Get index of bottom line minus 1
+                // Itembody = startOfResolution to index of bottom line
+                else
+                {
+                    itemBodyLength = (_.IndexOf(pageFooterTerm) - 1) - _.IndexOf(startOfResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+
+                    //Increment page and continue
+                    _buffer.Clear();
+                    _pageBase = _pages[++_index];
+                    _buffer.Append(_pageBase.ExtractText());
+                    _ = _buffer.ToString();
+
+                    // If it contains the next resolution, remove everything from the beginning of 
+                    // the next resolution
+                    // Check for next item
+                    if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
+                    {
+                        // Store text in _pdfText;
+                        _pdfText = _;
+
+                        // Remove the next item because the votes were getting mistaken for this one.
+                        _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
+
+                    }
+
+                    // Clear any misc text
+                    _ = _.Replace(_textToRemove, string.Empty);
+                    _ = _.Replace(_textToRemove2, string.Empty);
+                    _ = _.TrimStart();
+
+                    // If contains motionTo
+                    // Add everything from 0 to start
+                    if (_.Contains(_motionTo))
+                    {
+                        itemBody += " " + _.Substring(0, _.IndexOf(_motionTo));
+                    }
+
+                    // else if contains result
+                    // Add everything from 0 to start 
+                    else if (_.Contains(_result))
+                    {
+                        itemBody = " " + _.Substring(0, _.IndexOf(_result));
+                    }
+
+                    // Continue on to votes
+                }
 
                 if (_.Contains(_motionTo))
                 {
