@@ -31,17 +31,8 @@ namespace PdfParser
             _buffer.Append(_pageBase.ExtractText());
             _ = _buffer.ToString();
 
-            // If Section is only one page
-            if (_.Contains(_start) && _.Contains(_end))
-            {
-                LoadResolutions(singlePage: true);
-            }
-
-            LoadResolutions();
-
-            var endOfPHIndex = _.IndexOf("END OF PUBLIC HEARINGS");
-            var _pdftext = _.Substring(0, endOfPHIndex);
-
+            LoadResolutions(singlePage: true);
+            
             outIndex = _index;
         }
 

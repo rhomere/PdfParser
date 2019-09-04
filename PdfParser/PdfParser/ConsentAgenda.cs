@@ -9,16 +9,7 @@ namespace PdfParser
 {
     public class ConsentAgenda : Base
     {
-        //private string _pdfText { get; set; }
-        //private StringBuilder _buffer { get; set; } = new StringBuilder();
-        //private PdfPageBase _pageBase { get; set; }
-        //private string _result => "RESULT:";
-        //private string _mover => "MOVER:";
-        //private string _seconder => "SECONDER:";
-        //private string _ayes => "AYES:";
-        //private string _absent => "ABSENT:";
         private string _ca1 => "CA.1";
-        //private Spire.Pdf.Widget.PdfPageCollection _pages { get; set; }
         private int _consentAgendaPageIndex { get; set; }
 
         private int resultLength = 0;
