@@ -43,8 +43,8 @@ namespace PdfParser
             var indexOfItem = 0;
             var counter = 1;
             var sectionItemNumber = "PH.";
-            var startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
-            var oldStartOfResolution = string.Empty;
+            var startOfNextResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
+            var previousResolution = string.Empty;
             #endregion
 
             #region Get Page #
@@ -56,7 +56,7 @@ namespace PdfParser
             #endregion
 
             // While text contains item
-            while (_.Contains(startOfResolution))
+            while (_.Contains(startOfNextResolution))
             {
                 #region Delcare Variables
                 // Declare variables
@@ -72,10 +72,10 @@ namespace PdfParser
                 var itemBody = string.Empty;
                 #endregion
 
-                oldStartOfResolution = startOfResolution;
+                previousResolution = startOfNextResolution;
 
-                // Clear everything StartOfResolution
-                _ = _.Remove(0, _.IndexOf(startOfResolution));
+                // Clear everything prior to startOfNextResolution
+                _ = _.Remove(0, _.IndexOf(startOfNextResolution));
 
                 #region Get item Number
                 indexOfItem = _.IndexOf(_resolution);
@@ -98,26 +98,26 @@ namespace PdfParser
                 #endregion
 
                 #region Get Item Body
-                // Body length should be from startOfResolution to MotionTo: minus certain characters
+                // Body length should be from startOfNextResolution to MotionTo: minus certain characters
                 // or it there is a consistent ". " space after the period.
                 //itemBodyLength = (_.IndexOf(_cityOfMiami) - _cityOfMiami.Length) - _.IndexOf(_resolution);
                 if (_.Contains(_motionTo))
                 {
-                    itemBodyLength = (_.IndexOf(_motionTo) - 1) - _.IndexOf(startOfResolution);
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                    itemBodyLength = (_.IndexOf(_motionTo) - 1) - _.IndexOf(startOfNextResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfNextResolution), itemBodyLength).TrimEnd();
                 }
                 else if (_.Contains(_result))
                 {
-                    itemBodyLength = (_.IndexOf(_result) - 1) - _.IndexOf(startOfResolution);
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                    itemBodyLength = (_.IndexOf(_result) - 1) - _.IndexOf(startOfNextResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfNextResolution), itemBodyLength).TrimEnd();
                 }
                 // Else the whole page is part of the itemBody
                 // Get index of bottom line minus 1
-                // Itembody = startOfResolution to index of bottom line
+                // Itembody = startOfNextResolution to index of bottom line
                 else
                 {
-                    itemBodyLength = (_.IndexOf(pageFooterTerm) - 1) - _.IndexOf(startOfResolution);
-                    itemBody = _.Substring(_.IndexOf(startOfResolution), itemBodyLength).TrimEnd();
+                    itemBodyLength = (_.IndexOf(pageFooterTerm) - 1) - _.IndexOf(startOfNextResolution);
+                    itemBody = _.Substring(_.IndexOf(startOfNextResolution), itemBodyLength).TrimEnd();
 
                     //Increment page and continue
                     _buffer.Clear();
@@ -201,17 +201,23 @@ namespace PdfParser
                 }
                 #endregion
 
+                #region Increment counter to check for next item
                 // Increment counter to check for next item
                 counter++;
+
+                // When the item increments to double digits it looses a space and it no 
+                // longer similar to startOfNextResolution
                 if (counter < 10)
                 {
-                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
+                    startOfNextResolution = $"{sectionItemNumber}{counter.ToString()}                         RESOLUTION";
                 }
                 else
                 {
-                    startOfResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
+                    startOfNextResolution = $"{sectionItemNumber}{counter.ToString()}                        RESOLUTION";
                 }
+                #endregion
 
+                #region Add item
                 // Add Item
                 PublicHearingResolutions.Add(new PublicHearingResolution
                 {
@@ -225,7 +231,9 @@ namespace PdfParser
                     Ayes = ayes,
                     Absent = absent
                 });
+                #endregion
 
+                #region Get rest of page that was stored in _textBackUp
                 // Get rest of page that was stored in _textBackUp
                 if (!string.IsNullOrWhiteSpace(_textBackUp))
                 {
@@ -233,15 +241,14 @@ namespace PdfParser
                     _ = _textBackUp;
 
                     // Correction to the above logic
-                    // Remove everything prior to current resolution (startOfResolution)
-                    _ = _.Remove(0, _.IndexOf(startOfResolution));
+                    // Remove everything prior to current resolution (startOfNextResolution)
+                    _ = _.Remove(0, _.IndexOf(startOfNextResolution));
 
                     _textBackUp = null;
                 }
+                #endregion
 
-                // When the item increments to double digits it looses a space and it no 
-                // longer similar to startOfResolution
-                if (_.Contains(startOfResolution))
+                if (_.Contains(startOfNextResolution))
                 {
                     continue;
                 }
