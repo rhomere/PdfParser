@@ -12,7 +12,7 @@ namespace PdfParser
         internal int _index { get; set; } = 0;
         public int currentPageNumber { get; set; } = 0;
         public int newPageNumber { get; set; } = 0;
-        internal string _pdfText { get; set; }
+        internal string _textBackUp { get; set; }
         internal string _ { get; set; }
         internal StringBuilder _buffer { get; set; } = new StringBuilder();
         internal PdfPageBase _pageBase { get; set; }

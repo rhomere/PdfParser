@@ -10,6 +10,7 @@ namespace PdfParser
 {
     public class MiamiMeetingData
     {
+        #region Properties
         public ConsentAgenda ConsentAgenda { get; set; } = new ConsentAgenda();
         public MayoralVetoes MayoralVeotes { get; set; }
         public PublicHearings PublicHearings { get; set; }
@@ -21,6 +22,7 @@ namespace PdfParser
         public DiscussionItemSection DiscussionItemSection { get; set; }
         public DistrictSection District3Section { get; set; }
         public FutureLegislationSection FutureLegislationSection { get; set; }
+        #endregion
 
         public MiamiMeetingData()
         {
@@ -30,7 +32,7 @@ namespace PdfParser
         public void LoadData(PdfDocument doc)
         {
             var buffer = new StringBuilder();
-            //var miamiMeetingMinutes = new MiamiMeetingData();
+
             var pageCounter = 1;
 
             for (int i = 0; i < doc.Pages.Count; i++)

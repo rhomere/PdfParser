@@ -20,8 +20,6 @@ namespace PdfParser
         {
             PdfDocument doc = new PdfDocument();
 
-            var miamiMeetingMinutes = new MiamiMeetingData();
-
             doc.LoadFromFile(@"C:\Users\User\OneDrive\Projects\Regular Meeting\01-10-2019\Meeting.pdf");
 
             var data = new MiamiMeetingData();

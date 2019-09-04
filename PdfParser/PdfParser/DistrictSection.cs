@@ -76,8 +76,8 @@ namespace PdfParser
                 // Check for next item
                 if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
                 {
-                    // Store text in _pdfText;
-                    _pdfText = _;
+                    // Store text in _textBackUp;
+                    _textBackUp = _;
 
                     // Remove the next item because the votes were getting mistaken for this one.
                     _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
@@ -126,12 +126,12 @@ namespace PdfParser
                     throw new Exception("Find way to clear resolution");
 
                     // Get vote info
-                    //motionTo = _pdfText.Substring(_pdfText.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
-                    //result = _pdfText.Substring(_pdfText.IndexOf(_result) + _result.Length, 40).Trim();
-                    //movers.Add(_pdfText.Substring(_pdfText.IndexOf(_mover) + _mover.Length, 50).Trim());
-                    //seconders.Add(_pdfText.Substring(_pdfText.IndexOf(_seconder) + _seconder.Length, 50).Trim());
-                    //ayes.AddRange(_pdfText.Substring(_pdfText.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
-                    //absent.AddRange(_pdfText.Substring(_pdfText.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
+                    //motionTo = _textBackUp.Substring(_textBackUp.IndexOf(_motionTo) + _motionTo.Length, 40).Trim();
+                    //result = _textBackUp.Substring(_textBackUp.IndexOf(_result) + _result.Length, 40).Trim();
+                    //movers.Add(_textBackUp.Substring(_textBackUp.IndexOf(_mover) + _mover.Length, 50).Trim());
+                    //seconders.Add(_textBackUp.Substring(_textBackUp.IndexOf(_seconder) + _seconder.Length, 50).Trim());
+                    //ayes.AddRange(_textBackUp.Substring(_textBackUp.IndexOf(_ayes) + _ayes.Length, 50).Trim().Split(',').ToList());
+                    //absent.AddRange(_textBackUp.Substring(_textBackUp.IndexOf(_absent) + _absent.Length, 40).Trim().Split(',').ToList());
                 }
 
                 // Increment counter and check for next
@@ -159,11 +159,11 @@ namespace PdfParser
                     Absent = absent
                 });
 
-                // Get rest of page that was stored in _pdfText
-                if (!string.IsNullOrWhiteSpace(_pdfText))
+                // Get rest of page that was stored in _textBackUp
+                if (!string.IsNullOrWhiteSpace(_textBackUp))
                 {
                     // Get pdfText that was stored earlier
-                    _ = _pdfText;
+                    _ = _textBackUp;
 
                     // If contains oldStartResolution, remove it
                     if (_.Contains(oldStartOfResolution) && _.Contains(startOfResolution))
@@ -171,7 +171,7 @@ namespace PdfParser
                         _ = _.Remove(0, _.IndexOf(startOfResolution));
                     }
 
-                    _pdfText = null;
+                    _textBackUp = null;
                 }
 
                 // When the item increments to double digits it looses a space and it no 

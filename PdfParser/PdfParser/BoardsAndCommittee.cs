@@ -80,8 +80,8 @@ namespace PdfParser
                 // Check for next item
                 if (_.Contains(GetItemHeader(sectionItemNumber, counter + 1)))
                 {
-                    // Store text in _pdfText;
-                    _pdfText = _;
+                    // Store text in _textBackUp;
+                    _textBackUp = _;
 
                     // Remove the next item because the votes were getting mistaken for this one.
                     _ = _.Substring(0, _.IndexOf(GetItemHeader(sectionItemNumber, counter + 1)));
@@ -221,7 +221,7 @@ namespace PdfParser
                     _buffer.Append(_pageBase.ExtractText());
                     _ = _buffer.ToString();
 
-                    _pdfText = _;
+                    _textBackUp = _;
 
                     // Remove everthing from start of next resolution and on
                     if (_.Contains(startOfResolution))
@@ -279,10 +279,10 @@ namespace PdfParser
                     _splitPage = false;
                 }
 
-                if (!string.IsNullOrWhiteSpace(_pdfText))
+                if (!string.IsNullOrWhiteSpace(_textBackUp))
                 {
                     // Get pdfText that was stored earlier
-                    _ = _pdfText;
+                    _ = _textBackUp;
 
                     // If contains oldStartResolution, remove it
                     if (_.Contains(oldStartOfResolution) && _.Contains(startOfResolution))
@@ -290,7 +290,7 @@ namespace PdfParser
                         _ = _.Remove(0, _.IndexOf(startOfResolution));
                     }
 
-                    _pdfText = null;
+                    _textBackUp = null;
                 }
 
 
