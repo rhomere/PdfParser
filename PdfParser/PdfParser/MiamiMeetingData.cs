@@ -101,7 +101,7 @@ namespace PdfParser
 
                 #region Public Hearings
                 // PUBLIC HEARINGS
-                if (pdfText.Contains("PH - PUBLIC HEARINGS"))
+                if (pdfText.Contains("PH - PUBLIC HEARINGS") || pdfText.Contains("PH - PUBLIC HEARING"))
                 {
                     PublicHearings = GetPublicHearing(doc.Pages, i, out i);
 
