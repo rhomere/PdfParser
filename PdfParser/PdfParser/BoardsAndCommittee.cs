@@ -335,6 +335,10 @@ namespace PdfParser
             // While does not contain official or end of section i.e. canParseAppointee is false
             while (CanParseNominator(text) && CanMoveToNextLine(text))
             {
+                if (text == "/2019 ")
+                {
+                    return counter;
+                }
                 text = text.Remove(0, text.IndexOf("\r\n") + 4);
                 counter++;
             }
@@ -369,6 +373,8 @@ namespace PdfParser
                     return false;
                 case "MOTION":
                     return false;
+                case "City o":
+                    return false;
                 default:
                     return true;
             }
@@ -376,6 +382,11 @@ namespace PdfParser
 
         private bool CanMoveToNextLine(string _)
         {
+            if (_.Length < 6)
+            {
+                return false;
+            }
+            _ = _.TrimStart();
             var firstSixLetters = _.Substring(0, 6);
 
             switch (firstSixLetters)

@@ -47,7 +47,7 @@ namespace PdfParser
                 // As of 09/01/2019 there has not been a Mayoral Vetoes section with actual vetoes
                 // However 08/02/2019 there was a separated pdf with description
                 // "Mayor's Office - Item(s) Vetoed by the Mayor"
-                if (pdfText.Contains("MV - MAYORAL VETOES"))
+                if (pdfText.Contains("MV - MAYORAL VETOES") || pdfText.Contains("MV - MAYORAL VETOE"))
                 {
                     MayoralVeotes = GetMayoralVetoes(doc.Pages, i);
 
@@ -57,18 +57,18 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("CA - CONSENT AGENDA"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("CA - CONSENT AGENDA"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
@@ -84,18 +84,18 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("PH - PUBLIC HEARINGS"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("PH - PUBLIC HEARINGS"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
@@ -109,24 +109,24 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
                 #region Second Reading Ordinances
                 // SECOND READING ORDINANCES
-                if (pdfText.Contains("SR - SECOND READING ORDINANCES"))
+                if (pdfText.Contains("SR - SECOND READING ORDINANCES") || pdfText.Contains("SR - SECOND READING ORDINANCE"))
                 {
                     SecondReadings = GetSecondReading(doc.Pages, i, out i);
 
@@ -134,24 +134,24 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
                 #region First Reading Ordinances
                 // FIRST READING ORDINANCES
-                if (pdfText.Contains("FR - FIRST READING ORDINANCES"))
+                if (pdfText.Contains("FR - FIRST READING ORDINANCES") || pdfText.Contains("FR - FIRST READING ORDINANCE"))
                 {
                     FirstReadings = GetFirstReading(doc.Pages, i, out i);
 
@@ -159,24 +159,24 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("RE - RESOLUTIONS"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("RE - RESOLUTIONS"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
                 #region Resolutions
                 // RESOLUTIONS
-                if (pdfText.Contains("RE - RESOLUTIONS"))
+                if (pdfText.Contains("RE - RESOLUTIONS") || pdfText.Contains("RE - RESOLUTION"))
                 {
                     Resolutions = GetResolutions(doc.Pages, i, out i);
 
@@ -184,18 +184,18 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("AC - ATTORNEY-CLIENT SESSION"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
@@ -209,24 +209,24 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
                 #region Boards and Committees
                 //BOARDS AND COMMITTEES
-                if (pdfText.Contains("BC - BOARDS AND COMMITTEES"))
+                if (pdfText.Contains("BC - BOARDS AND COMMITTEES") || pdfText.Contains("BC - BOARDS AND COMMITTEE"))
                 {
                     BoardsAndCommittee = GetMiamiMeetingMinutes(doc.Pages, i, out i);
 
@@ -234,24 +234,24 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("DI - DISCUSSION ITEMS"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("DI - DISCUSSION ITEMS"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
                 #region Discussion Items
                 // DISCUSSION ITEMS
-                if (pdfText.Contains("DI - DISCUSSION ITEMS"))
+                if (pdfText.Contains("DI - DISCUSSION ITEMS") || pdfText.Contains("DI - DISCUSSION ITEM"))
                 {
                     DiscussionItemSection = GetDiscussionItems(doc.Pages, i, out i);
 
@@ -259,18 +259,18 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("D3 - DISTRICT 3"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("D3 - DISTRICT 3"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
@@ -284,24 +284,24 @@ namespace PdfParser
                     buffer.Append(pageBase.ExtractText());
                     pdfText = buffer.ToString();
 
-                    if (pdfText.Contains("FL - FUTURE LEGISLATION"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        buffer.Clear();
-                        i++;
-                        pageBase = doc.Pages[i];
-                        buffer.Append(pageBase.ExtractText());
-                        pdfText = buffer.ToString();
-                    }
+                    //if (pdfText.Contains("FL - FUTURE LEGISLATION"))
+                    //{
+                    //    continue;
+                    //}
+                    //else
+                    //{
+                    //    buffer.Clear();
+                    //    i++;
+                    //    pageBase = doc.Pages[i];
+                    //    buffer.Append(pageBase.ExtractText());
+                    //    pdfText = buffer.ToString();
+                    //}
                 }
                 #endregion
 
                 #region Future Legislation
                 // FUTURE LEGISLATION
-                if (pdfText.Contains("FL - FUTURE LEGISLATION"))
+                if (pdfText.Contains("FL - FUTURE LEGISLATION") || pdfText.Contains("FL - FUTURE LEGISLATIONS"))
                 {
                     FutureLegislationSection = GetFutureLegislation(doc.Pages, i, out i);
 
