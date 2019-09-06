@@ -28,11 +28,9 @@ namespace PdfParser
             _buffer.Append(_pageBase.ExtractText());
             _ = _buffer.ToString();
 
-            // If Section is only one page
-            if (_.Contains(_start) && _.Contains(_end))
-            {
-                LoadFutureLegislationItems(singlePage: true);
-            }
+            // If Section is only one page    
+            LoadFutureLegislationItems(singlePage: true);
+            
 
             outIndex = _index;
         }
