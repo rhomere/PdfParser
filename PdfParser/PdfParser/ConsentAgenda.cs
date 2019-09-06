@@ -39,7 +39,7 @@ namespace PdfParser
             _consentAgendaPageIndex = consentAgendaPageIndex;
             _pageBase = pages[consentAgendaPageIndex];
             _buffer.Append(_pageBase.ExtractText());
-            _textBackUp = _buffer.ToString();
+            _ = _buffer.ToString();
 
             LoadConsentAgenda(out outIndex);
 
@@ -53,16 +53,19 @@ namespace PdfParser
         private void LoadConsentAgenda(out int consentAgendaPageIndexOut)
         {
             int outIndex = 0;
-            if (_textBackUp.Contains("The following item(s) was Adopted on the Consent Agenda"))
+            if (_.Contains("The following item(s) was Adopted on the Consent Agenda"))
             {
                 LoadResultBoxLengths();
 
                 // Value = Index of Value title + Length of title
-                Result = _textBackUp.Substring(_textBackUp.IndexOf(_result) + _result.Length, 30).Trim();
-                Movers.Add(_textBackUp.Substring(_textBackUp.IndexOf(_mover) + _mover.Length, 40).Trim());
-                Seconders.Add(_textBackUp.Substring(_textBackUp.IndexOf(_seconder) + _seconder.Length, 40).Trim());
-                Ayes.AddRange(_textBackUp.Substring(_textBackUp.IndexOf(_ayes) + _ayes.Length, 40).Trim().Split(',').ToList());
-                Absent.AddRange(_textBackUp.Substring(_textBackUp.IndexOf(_absent) + _absent.Length, 30).Trim().Split(',').ToList());
+                Result = _.Substring(_.IndexOf(_result) + _result.Length, 30).Trim();
+                Movers.Add(_.Substring(_.IndexOf(_mover) + _mover.Length, 40).Trim());
+                Seconders.Add(_.Substring(_.IndexOf(_seconder) + _seconder.Length, 40).Trim());
+                Ayes.AddRange(_.Substring(_.IndexOf(_ayes) + _ayes.Length, 40).Trim().Split(',').ToList());
+                if (_.Contains(_absent))
+                {
+                    Absent.AddRange(_.Substring(_.IndexOf(_absent) + _absent.Length, 30).Trim().Split(',').ToList());
+                }
                 Resolutions = GetConsentAgendaResolutions(_pages, _consentAgendaPageIndex, out outIndex);
             }
             consentAgendaPageIndexOut = outIndex;
@@ -71,25 +74,25 @@ namespace PdfParser
 
         private void LoadResultBoxLengths()
         {
-            if (_textBackUp.Contains(_result))
+            if (_.Contains(_result))
             {
-                resultLength = _textBackUp.IndexOf(_mover) - _textBackUp.IndexOf(_result);
+                resultLength = _.IndexOf(_mover) - _.IndexOf(_result);
             }
-            if (_textBackUp.Contains(_mover))
+            if (_.Contains(_mover))
             {
-                moverLength = _textBackUp.IndexOf(_seconder) - _textBackUp.IndexOf(_mover);
+                moverLength = _.IndexOf(_seconder) - _.IndexOf(_mover);
             }
-            if (_textBackUp.Contains(_seconder))
+            if (_.Contains(_seconder))
             {
-                seconderLength = _textBackUp.IndexOf(_ayes) - _textBackUp.IndexOf(_seconder);
+                seconderLength = _.IndexOf(_ayes) - _.IndexOf(_seconder);
             }
-            if (_textBackUp.Contains(_ayes))
+            if (_.Contains(_ayes))
             {
-                ayesLength = _textBackUp.IndexOf(_absent) - _textBackUp.IndexOf(_ayes);
+                ayesLength = _.IndexOf(_absent) - _.IndexOf(_ayes);
             }
-            if (_textBackUp.Contains(_absent))
+            if (_.Contains(_absent))
             {
-                absentLength = _textBackUp.IndexOf(_ca1) - _textBackUp.IndexOf(_absent);
+                absentLength = _.IndexOf(_ca1) - _.IndexOf(_absent);
             }
         }
 
