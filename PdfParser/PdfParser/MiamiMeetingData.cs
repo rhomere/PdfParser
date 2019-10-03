@@ -31,10 +31,12 @@ namespace PdfParser
 
         public void LoadData(PdfDocument doc)
         {
+            // Use to hold text from page
             var buffer = new StringBuilder();
 
             var pageCounter = 1;
 
+            // Loop through each page in the doc
             for (int i = 0; i < doc.Pages.Count; i++)
             {
                 var pdfText = string.Empty;

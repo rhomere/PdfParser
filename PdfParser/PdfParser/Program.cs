@@ -26,9 +26,9 @@ namespace PdfParser
             //doc.LoadFromFile(@"C:\Users\User\OneDrive\Projects\Regular Meeting\04-11-2019\Meeting.pdf");
             doc.LoadFromFile(@"C:\Users\User\OneDrive\Projects\Regular Meeting\05-09-2019\Meeting.pdf");
 
-            var data = new MiamiMeetingData();
+            var miamiMeeting = new MiamiMeetingData();
 
-            data.LoadData(doc);
+            miamiMeeting.LoadData(doc);
 
             Console.ReadLine();
         }
