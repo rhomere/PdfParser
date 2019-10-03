@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.ConsentAgenda
 {
-    public class ConsentAgenda : CityBase
+    public class ConsentAgenda : SectionBase
     {
         private string _ca1 => "CA.1";
         private int _consentAgendaPageIndex { get; set; }

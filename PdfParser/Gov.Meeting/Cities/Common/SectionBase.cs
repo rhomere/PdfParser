@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Gov.Meeting.Cities.Common
 {
-    public class CityBase
+    public class SectionBase
     {
         internal int _index { get; set; } = 0;
         public int currentPageNumber { get; set; } = 0;

@@ -47,17 +47,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cities\Common\CityBase.cs" />
+    <Compile Include="Cities\Common\SectionBase.cs" />
     <Compile Include="Cities\Common\ItemBase.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Meeting.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\AttorneyClient\AttorneyClientSession.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\AttorneyClient\AttorneyClientSessionItem.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\BoardsAndCommittee\BoardAndCommittee.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\BoardsAndCommittee\BoardAndCommitteeItem.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\ConsentAgenda\ConsentAgenda.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\ConsentAgenda\ConsentAgendaItem.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\Discussion\Discussion.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\Discussion\DiscussionItem.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\District\District.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\FutureLegislation\FutureLegislation.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\FutureLegislation\FutureLegislationItem.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\MayoralVetoe\MayoralVetoe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Cities\Miami\CityCommissionMeeting\Sections\PublicHearing\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

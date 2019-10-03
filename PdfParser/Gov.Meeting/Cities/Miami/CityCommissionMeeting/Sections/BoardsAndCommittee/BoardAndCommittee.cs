@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.BoardsAndCommittee
 {
-    public class BoardAndCommittee : CityBase
+    public class BoardAndCommittee : SectionBase
     {
         #region Private Properties
         private string _resolution = "RESOLUTION";
