@@ -62,11 +62,17 @@
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\FutureLegislation\FutureLegislation.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\FutureLegislation\FutureLegislationItem.cs" />
     <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\MayoralVetoe\MayoralVetoe.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\PublicHearing\PublicHearing.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\PublicHearing\PublicHearingResolution.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\Reading\Reading.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\Reading\ReadingItem.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\Resolution\Resolution.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\Resolution\ResolutionItem.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\SecondReading\SecondReading.cs" />
+    <Compile Include="Cities\Miami\CityCommissionMeeting\Sections\SecondReading\SecondReadingItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Cities\Miami\CityCommissionMeeting\Sections\PublicHearing\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
