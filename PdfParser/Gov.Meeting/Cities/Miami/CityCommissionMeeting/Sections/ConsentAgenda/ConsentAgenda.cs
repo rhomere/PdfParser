@@ -9,9 +9,17 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.ConsentAgenda
 {
     public class ConsentAgenda : SectionBase
     {
+        #region Private Properties
         private string _ca1 => "CA.1";
         private int _consentAgendaPageIndex { get; set; }
+        private int resultLength = 0;
+        private int moverLength = 0;
+        private int seconderLength = 0;
+        private int ayesLength = 0;
+        private int absentLength = 0;
+        #endregion
 
+        #region Public Properties
         public List<ConsentAgendaItem> Resolutions { get; set; }
         public string Result { get; set; }
         public List<string> Movers { get; set; }
@@ -19,6 +27,7 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.ConsentAgenda
         public List<string> Ayes { get; set; }
         public List<string> Absent { get; set; }
         public bool ConsentAgendComplete { get; set; }
+        #endregion
 
         public ConsentAgenda(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex, out int outIndex)
         {
@@ -85,7 +94,7 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.ConsentAgenda
 
         private static List<ConsentAgendaItem> GetConsentAgendaResolutions(Spire.Pdf.Widget.PdfPageCollection pages, int consentAgendaPageIndex, out int indexOut)
         {
-            var resolutions = new List<MeetingItem>();
+            var resolutions = new List<ConsentAgendaItem>();
 
             //var _resolution = "RESOLUTION";
             var _endOfConsentAgenda = "END OF CONSENT AGENDA";
@@ -97,9 +106,7 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.ConsentAgenda
             buffer.Append(pageBase.ExtractText());
             pdfText = buffer.ToString();
 
-            var _consentAgendaEnd = "END OF CONSENT AGENDA";
-
-            while (!pdfText.Contains(_consentAgendaEnd))
+            while (!pdfText.Contains(_endOfConsentAgenda))
             {
                 resolutions.AddRange(GetResolutions(pdfText));
 
@@ -135,6 +142,12 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.ConsentAgenda
                 indexOfResolution = pdfText.IndexOf(_resolution);
                 resolutionNumber = pdfText.Substring(indexOfResolution, 40).Replace(_resoltutionHeaderSpace, string.Empty).Trim();
                 enactmentNumber = pdfText.Substring(pdfText.IndexOf(_enactmentNumber) + _enactmentNumber.Length, 30).Trim();
+                // If no enactmentNumber, the item may have been pulled. 
+                // Should skip the item without the enactmentNumber.
+                if (string.IsNullOrWhiteSpace(enactmentNumber) && pdfText.Contains("Item Pulled from Consent"))
+                {
+                    return resolutions;   
+                }
                 var resolutionBodyLength = pdfText.IndexOf(_enactmentNumber) - pdfText.IndexOf(_resolution);
                 var resolutionBody = pdfText.Substring(pdfText.IndexOf(_resolution) + _resolution.Length, resolutionBodyLength);
                 var endOfResolution = pdfText.IndexOf(enactmentNumber) + enactmentNumber.Length;

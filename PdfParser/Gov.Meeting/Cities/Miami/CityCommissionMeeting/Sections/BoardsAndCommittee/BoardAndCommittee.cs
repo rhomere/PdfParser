@@ -259,7 +259,7 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.BoardsAndCommi
                 }
 
                 // Add Item
-                BoardsAndCommitteeItems.Add(new BoardsAndCommitteeItem
+                BoardsAndCommitteeItems.Add(new BoardAndCommitteeItem
                 {
                     Body = itemBody,
                     ItemNumber = itemNumber,

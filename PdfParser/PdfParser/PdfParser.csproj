@@ -34,10 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Spire.License, Version=1.3.7.46, Culture=neutral, PublicKeyToken=b1144360237c8b3f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Spire.PDF.5.6.27\lib\net46\Spire.License.dll</HintPath>
+      <HintPath>..\packages\Spire.PDF.5.9.16\lib\net46\Spire.License.dll</HintPath>
     </Reference>
-    <Reference Include="Spire.Pdf, Version=5.6.27.2046, Culture=neutral, PublicKeyToken=663f351905198cb3, processorArchitecture=MSIL">
-      <HintPath>..\packages\Spire.PDF.5.6.27\lib\net46\Spire.Pdf.dll</HintPath>
+    <Reference Include="Spire.Pdf, Version=5.9.16.2046, Culture=neutral, PublicKeyToken=663f351905198cb3, processorArchitecture=MSIL">
+      <HintPath>..\packages\Spire.PDF.5.9.16\lib\net46\Spire.Pdf.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -69,6 +69,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gov.Meeting\Gov.Meeting.csproj">
+      <Project>{45B7C267-2376-414E-8540-347074457CA2}</Project>
+      <Name>Gov.Meeting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

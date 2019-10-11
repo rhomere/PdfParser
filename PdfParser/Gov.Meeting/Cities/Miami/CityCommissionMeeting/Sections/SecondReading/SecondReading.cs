@@ -200,7 +200,7 @@ namespace Gov.Meeting.Cities.Miami.CityCommissionMeeting.Sections.SecondReading
                 }
 
                 // Add Item
-                SecondReadingOrdinances.Add(new SecondReadingOrdinance
+                SecondReadingOrdinances.Add(new SecondReadingItem
                 {
                     ItemNumber = itemNumber,
                     EnactmentNumber = enactmentNumber,

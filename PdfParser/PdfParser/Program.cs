@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Spire.Pdf;
 using Spire.Pdf.Widget;
+using Gov.Meeting.Cities.Miami.CityCommissionMeeting;
 
 namespace PdfParser
 {
@@ -26,7 +27,7 @@ namespace PdfParser
             //doc.LoadFromFile(@"C:\Users\User\OneDrive\Projects\Regular Meeting\04-11-2019\Meeting.pdf");
             doc.LoadFromFile(@"C:\Users\User\OneDrive\Projects\Regular Meeting\05-09-2019\Meeting.pdf");
 
-            var miamiMeeting = new MiamiMeetingData();
+            var miamiMeeting = new Meeting();
 
             miamiMeeting.LoadData(doc);
 
